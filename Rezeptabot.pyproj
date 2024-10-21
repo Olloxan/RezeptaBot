@@ -27,6 +27,7 @@
     <Compile Include="ui\user_interface.py" />
     <Compile Include="UserInterface.py" />
     <Compile Include="Rezeptabot.py" />
+    <Compile Include="VectorStore.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="CondaEnv|CondaEnv|rezeptEnv" />

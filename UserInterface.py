@@ -7,12 +7,11 @@ import time
     
 
 class UserInterface:
-    def __init__(self, chatbot=None, streaming = False) -> None:
+    def __init__(self, chatfunction=None) -> None:
         self._interface = None
-        self._query_handler = chatbot
-        self._streaming = streaming        
+        self._chatfunction = chatfunction           
         self.chatbot = gr.Chatbot(value = [[None, "Hello you!"]])
-        self.demo = gr.ChatInterface(fn=self._query_handler, chatbot=self.chatbot).queue()
+        self.demo = gr.ChatInterface(fn=self._chatfunction, chatbot=self.chatbot).queue()
         pass
     
     def _open_browser(self, port):
@@ -22,9 +21,7 @@ class UserInterface:
                       
     def render(self):
         try:
-            port = 7860
-            threading.Thread(target=self._open_browser, args=(port,), daemon=True).start()
-            
+            port = 7860                        
             self.demo.launch(debug=True, show_api=False, inline=False, server_port=port, inbrowser=True )
             # demo.close()
         except Exception as e:
