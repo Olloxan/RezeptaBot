@@ -1,10 +1,9 @@
-from huggingface_hub import User
-
 from langchain_community.llms import Ollama
 from UserInterface import UserInterface
 from VectorStore import VectorStore
-modelname = "llama3.1:8b-instruct-q4_K_S"
 
+
+modelname = "llama3.1:8b-instruct-q4_K_S"
 model = Ollama(model = modelname)
 
 
@@ -28,10 +27,10 @@ def chat_gen(message, history):
     
      
      
-    for token in model.stream(message):        
-    ## If you're using standard print, keep line from getting too long
-        buffer += token
-        yield buffer
+    # for token in model.stream(message):        
+    # ## If you're using standard print, keep line from getting too long
+    #     buffer += token
+    #     yield buffer
         
 interface = UserInterface(chatfunction=chat_gen)
 interface.render()
