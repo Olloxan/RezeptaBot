@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>5848bdb6-ad33-43d0-90c2-0692aadc2448</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>UserInterface.py</StartupFile>
+    <StartupFile>Rezeptabot.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,11 +22,39 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ui\configuration.py" />
+    <Compile Include="ui\select_folder.py" />
+    <Compile Include="ui\user_interface.py" />
     <Compile Include="UserInterface.py" />
     <Compile Include="Rezeptabot.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="CondaEnv|CondaEnv|rezeptEnv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ui\" />
+    <Folder Include="ui\assets\" />
+    <Folder Include="ui\www\" />
+    <Folder Include="ui\__pycache__\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ui\.gitignore" />
+    <Content Include="ui\assets\download.png" />
+    <Content Include="ui\assets\edit.png" />
+    <Content Include="ui\assets\folder.png" />
+    <Content Include="ui\assets\image.png" />
+    <Content Include="ui\assets\info.png" />
+    <Content Include="ui\assets\nvidia_logo.png" />
+    <Content Include="ui\assets\nvidia_logo_.png" />
+    <Content Include="ui\assets\regenerate.png" />
+    <Content Include="ui\assets\reset.png" />
+    <Content Include="ui\assets\retry.png" />
+    <Content Include="ui\assets\shutdown.png" />
+    <Content Include="ui\assets\undo.png" />
+    <Content Include="ui\www\app.css" />
+    <Content Include="ui\www\app.js" />
+    <Content Include="ui\__pycache__\configuration.cpython-310.pyc" />
+    <Content Include="ui\__pycache__\user_interface.cpython-310.pyc" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

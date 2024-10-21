@@ -1,7 +1,8 @@
+from huggingface_hub import User
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_community.llms import Ollama
-
+from UserInterface import UserInterface
 
 modelname = "llama3.1:8b-instruct-q4_K_S"
 
@@ -30,8 +31,7 @@ def chat_gen(message, history):
     #     buffer += token
     #     yield buffer
         
-
-
-
+interface = UserInterface(chatbot=chat_gen)
+interface.render()
 
 

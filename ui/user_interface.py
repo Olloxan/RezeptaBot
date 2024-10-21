@@ -26,7 +26,6 @@ import math
 import uuid
 import sys
 import os
-import kaizen_theme as kaizen
 import re
 import threading
 import webbrowser
@@ -158,50 +157,26 @@ class MainInterface:
     def on_regenerate_index(self, callback):
         self._regenerate_index_callback = callback
 
-    def _get_theme(self):
-        primary_hue = gr.themes.Color("#76B900", "#76B900", "#76B900", "#76B900", "#76B900", "#76B900", "#76B900", "#76B900", "#76B900", "#76B900", "#76B900")
-        neutral_hue = gr.themes.Color("#292929", "#292929", "#292929", "#292929", "#292929", "#292929", "#292929", "#292929", "#292929", "#292929", "#292929")
-        return gr.Theme(
-            primary_hue=primary_hue,
-            neutral_hue=neutral_hue
-        ).set(
-            body_background_fill="#191919",
-            body_background_fill_dark="#191919",
-            block_background_fill="#292929",
-            block_background_fill_dark="#292929",
-            block_label_background_fill="#292929",
-            block_label_background_fill_dark="#292929",
-            border_color_primary="#191919",#components background
-            border_color_primary_dark="#191919",
-            background_fill_primary="#292929",#dropdown
-            background_fill_primary_dark="#292929",
-            background_fill_secondary="#393939",#response chatbot bubble
-            background_fill_secondary_dark="#393939",
-            color_accent_soft="#393939",#request chatbot bubble
-            color_accent_soft_dark="#393939",
-            #text colors
-            block_label_text_color="#FFFFFF",
-            block_label_text_color_dark="#FFFFFF",
-            body_text_color="#FFFFFF",
-            body_text_color_dark="#FFFFFF",
-            body_text_color_subdued="#FFFFFF",
-            body_text_color_subdued_dark="#FFFFFF",
-            button_secondary_text_color="#FFFFFF",
-            button_secondary_text_color_dark="#FFFFFF",
-            button_primary_text_color="#FFFFFF",
-            button_primary_text_color_dark="#FFFFFF",
-            input_placeholder_color="#FFFFFF",#placeholder text color
-            input_placeholder_color_dark="#FFFFFF",
-        )
+    def _get_theme(self):        
+        return gr.themes.Default()
+
+    # def _get_theme(self):
+    #     return gr.themes.Default().set(
+    #         body_background_fill="#191919",
+    #         body_background_fill_dark="#191919",
+    #         block_background_fill="#292929",
+    #         block_background_fill_dark="#292929",
+    #         # ... add other custom styles as needed
+    #     )
 
     def get_css(self):
-        return kaizen.css() + open(os.path.join(os.path.dirname(__file__), 'www/app.css')).read()
+        return open(os.path.join(os.path.dirname(__file__), 'www/app.css')).read()
 
     def render(self):
         with gr.Blocks(
             title="Chat with RTX",
             analytics_enabled=False,
-            theme=kaizen.theme(),
+            theme=gr.themes.Default(),
             css=self.get_css(),
             js=os.path.join(os.path.dirname(__file__), 'www/app.js')
         ) as interface:
