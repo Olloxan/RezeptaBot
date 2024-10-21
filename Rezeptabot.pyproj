@@ -22,6 +22,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Chatbot.py" />
     <Compile Include="ui\configuration.py" />
     <Compile Include="ui\select_folder.py" />
     <Compile Include="ui\user_interface.py" />

@@ -9,7 +9,7 @@ import time
 class UserInterface:
     def __init__(self, chatfunction=None) -> None:
         self._interface = None
-        self._chatfunction = chatfunction           
+        self._chatfunction = chatfunction                   
         self.chatbot = gr.Chatbot(value = [[None, "Hello you!"]])
         self.demo = gr.ChatInterface(fn=self._chatfunction, chatbot=self.chatbot).queue()
         pass
