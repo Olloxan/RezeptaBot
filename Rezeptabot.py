@@ -15,6 +15,7 @@ chatbot = ChatbotWithHistory(model=model)
 
 conversation_state = 0
 
+state = {}
 
 def chat_gen(message, history=[], return_buffer=True):        
     buffer = "" 
@@ -23,20 +24,20 @@ def chat_gen(message, history=[], return_buffer=True):
         
     # State 0: 
     # Plauerphase: das Netzwerk unterhaelt sich mit dem Nutzer (ein kurzes Lebenszeichen, um zu sehen, ob Ollama laeuft, Ollama aus einem Subprocess heraus starten, wenn es nicht schon laeuft)    
-        state={'message' : message}
+        state['message'] = message
         state['history'] = history
         for token in chatbot.stream(state):           
             buffer += token
             yield buffer if return_buffer else token
 
-    elif state == 1:
+    elif conversation_state == 1:
     # state 1: 
-        # docs_and_scores = chroma_db.similarity_search_with_score(query=message, k=20)
+        docs_and_scores = chroma_db.similarity_search_with_score(query=message, k=20)
 
-        # for doc, score in docs_and_scores:
-        #     buffer += f"Document: {doc}, Similarity Score: {score}\n"
-        #     yield buffer
-        x=3
+        for doc, score in docs_and_scores:
+            buffer += f"Document: {doc}, Similarity Score: {score}\n"
+            yield buffer
+        
     # state 2: Einkaufsliste
        
 

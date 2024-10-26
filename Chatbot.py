@@ -3,15 +3,27 @@ from operator import itemgetter
 from langchain_core.prompts import PromptTemplate
 from typing import List, Union
 
-from langchain_core.runnables import RunnableLambda
+from langchain_core.runnables import RunnableLambda, RunnableAssign
 from functools import partial
+from rich.console import Console
+from rich.style import Style
+from rich.theme import Theme
 
+console = Console()
+base_style = Style(color="#76B900", bold=True)
+pprint = partial(console.print, style=base_style)
 
 def PrintTextWithLabel(label="State: "):
     def print_and_return(x, label=""):
         print(f"{label}{x}")
         return x
     return RunnableLambda(partial(print_and_return, label=label))
+
+def PrintStructureWithLabel(preface="State: "):
+    def print_and_return(x, preface=""):
+        pprint(preface, x)
+        return x
+    return RunnableLambda(partial(print_and_return, preface=preface))
 
 class ChatbotWithHistory:
     def __init__(self, model):
@@ -31,13 +43,13 @@ class ChatbotWithHistory:
         historystring = self.build_history(state['history'][-5:])
         prompt = PromptTemplate.from_template(f"{self.systemmessage}{historystring}" + "<|start_header_id|>user<|end_header_id|>{input}<|eot_id|><|start_header_id|>assistant<|end_header_id|>")
         parser = StrOutputParser()
-                
-        chain = (
+                        
+        chain = (            
             { 
                 "input": itemgetter("message") 
-            } 
-            | prompt 
-            | self.model 
+            }             
+            | prompt            
+            | self.model                                  
             | parser
             )
                 
