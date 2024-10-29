@@ -38,24 +38,27 @@ class ConversationStateMachine:
 
 state_machine = ConversationStateMachine()
 
-branch = RunnableBranch(
-    default= model,  # Default chain to run
-    branches={
-        "collect_info": model,
-        "process_info": model,
-        "provide_summary": model,
-    },
-    select_branch=lambda inputs: state_machine.get_state()  # Dynamic state selection
-    )
+# branch = RunnableBranch(
+#     default= model,  # Default chain to run
+#     branches={
+#         "collect_info": model,
+#         "process_info": model,
+#         "provide_summary": model,
+#     },
+#     select_branch=lambda inputs: state_machine.get_state()  # Dynamic state selection
+#     )
 
 def chat_gen(message, history=[], return_buffer=True):        
     buffer = "" 
     
-    output = branch.invoke(state)
-    streamoutput = output['answer']
-    for token in streamoutput:            
-        buffer += token
-        yield buffer
+    # output = branch.invoke(state)
+    # streamoutput = output['answer']
+    # Update conversation state
+    
+    # for token in streamoutput:            
+    #     buffer += token
+    yield buffer
+    
     
     #### ToDo ####
     
