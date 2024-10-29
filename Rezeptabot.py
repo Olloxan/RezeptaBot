@@ -20,23 +20,6 @@ conversation_state = 0
 
 state = {}
 
-class ConversationStateMachine:
-    def __init__(self):
-        self.state = "collect_info"  # Initial state
-    
-
-    def update_state(self, model_output):
-        # ich will, dass hier einfach nur das state_dict rein geht und der state raus geholt wird
-        if "enough information" in model_output.lower():
-            self.state = "process_info"
-        elif "processing complete" in model_output.lower():
-            self.state = "provide_summary"
-        # Add more complex logic as needed
-    
-    def get_state(self):
-        return self.state
-
-state_machine = ConversationStateMachine()
 
 # branch = RunnableBranch(
 #     default= model,  # Default chain to run
@@ -50,17 +33,25 @@ state_machine = ConversationStateMachine()
 
 def chat_gen(message, history=[], return_buffer=True):        
     buffer = "" 
+            
+    state['message'] = message
+    state['history'] = history
+    for token in chatbot.stream(state):           
+        buffer += token
+        yield buffer if return_buffer else token
     
-    # output = branch.invoke(state)
-    # streamoutput = output['answer']
-    # Update conversation state
+
+def document_retrieve(text_input):
     
-    # for token in streamoutput:            
-    #     buffer += token
-    yield buffer
+    docs_and_scores = chroma_db.similarity_search_with_score(query=text_input, k=10)
+
+    receipes = []
+    for doc, score in docs_and_scores:
+        receipes.append(doc.page_content)
+        
+    return receipes
+        
     
-    
-    #### ToDo ####
     
      
 
@@ -73,7 +64,7 @@ def chat_gen(message, history=[], return_buffer=True):
 # for response in chat_gen(test_question, return_buffer=False):
 #     print(response, end='')
 
-interface = UserInterface(chatfunction=chat_gen)
+interface = UserInterface(chat_fn=chat_gen, documentretrieval_fn=document_retrieve)
 interface.render()
 
 

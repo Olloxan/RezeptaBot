@@ -1,11 +1,15 @@
+from winreg import EnumValue
 import gradio as gr
 import webbrowser
 import time
+import pandas as pd
+
+
 
 class UserInterface:
-    def __init__(self, chatfunction=None, chain_function=None) -> None:
-        self._chatfunction = chatfunction
-        self._chain_function = chain_function
+    def __init__(self, chat_fn=None, documentretrieval_fn=None) -> None:
+        self._chatfunction = chat_fn
+        self._documentfunction = documentretrieval_fn
         
     def process_chain(self, text):
         if self._chain_function:
@@ -18,62 +22,48 @@ class UserInterface:
         try:
             port = 7860
             
-            with gr.Blocks() as blocks:
+            with gr.Blocks(fill_width=True, fill_height=True) as blocks:
                 with gr.Row():
                     # Left column: Chat interface
                     with gr.Column(scale=1):
-                        chatbot = gr.Chatbot(value=[[None, "Hello you!"]], height=600)
-                        msg = gr.Textbox(
+                        gr.Markdown("### Shopping list")
+                        
+                        initial_data = pd.DataFrame({
+                                        "Column 1": ["", "", ""],
+                                        "Column 2": ["", "", ""],
+                                        "Column 3": ["", "", ""],
+})
+                        
+                        self.data_frame_shoppingList = gr.DataFrame(value=initial_data, headers=["Column 1", "Column 2", "Column 3"], label="Editable Table", interactive=True)
+                        self.submit_btn_shoppingList = gr.Button("Process Chain")
+
+                    with gr.Column(scale=1):
+                        self.chatbot = gr.Chatbot(value=[[None, "Hello you!"]])                       
+                        self.msg = gr.Textbox(
                             label="Chat message",
                             placeholder="Type your message here...",
                             show_label=False
                         )
                         with gr.Row():
-                            submit = gr.Button("Submit")
-                            clear = gr.Button("Clear")
+                            self.submit = gr.Button("Submit")
+                            self.clear = gr.Button("Clear")
                     
                     # Right column: Chain input and document display
                     with gr.Column(scale=1):
                         gr.Markdown("### Document Chain")
-                        text_input = gr.Textbox(
+                        self.text_input = gr.Textbox(
                             label="Enter text for document chain",
                             placeholder="Type your input here...",
-                            lines=3
+                            show_label=False
                         )
-                        submit_btn = gr.Button("Process Chain")
-                        doc_output = gr.Textbox(
-                            label="Documents",
-                            lines=20,
-                            max_lines=30,
-                            show_copy_button=True
-                        )
+                        self.submit_btn = gr.Button("Process Chain")
+                        
+                        self.data_frame = gr.DataFrame(headers=["Nr.", "Rezept"], datatype=["number", "str"], wrap=True)
+                        
+                        
                 
-                # Chat functions
-                def respond(message, chat_history):
-                    bot_message = self._chatfunction(message, chat_history)
-                    chat_history.append((message, bot_message))
-                    return "", chat_history
-                
-                submit.click(
-                    respond, 
-                    [msg, chatbot], 
-                    [msg, chatbot]
-                )
-                
-                msg.submit(
-                    respond, 
-                    [msg, chatbot], 
-                    [msg, chatbot]
-                )
-                
-                clear.click(lambda: None, None, chatbot, queue=False)
-                
-                # Chain functions
-                submit_btn.click(
-                    fn=self.process_chain,
-                    inputs=[text_input],
-                    outputs=[doc_output]
-                )
+                # Attach button event handlers
+                self._attach_button_events()               
             
             # Launch the interface
             blocks.queue()
@@ -83,6 +73,42 @@ class UserInterface:
             print(e)
             raise e
     
-    def open_browser(self, port):
-        time.sleep(2)
-        webbrowser.open(f'http://localhost:{port}')
+    def _attach_button_events(self):
+        """Attach event handlers to buttons."""
+    
+        # Chat submit and clear buttons
+        self.submit.click(self._handle_chat_submit, [self.msg, self.chatbot], [self.msg, self.chatbot])
+        self.msg.submit(self._handle_chat_submit, [self.msg, self.chatbot], [self.msg, self.chatbot])
+        self.clear.click(self._handle_chat_clear, None, self.chatbot, queue=False)
+    
+        # Document chain process button
+        self.submit_btn.click(fn=self._handle_process_chain, inputs=[self.text_input], outputs=[self.data_frame])
+
+
+    def _handle_chat_submit(self, message, chat_history):
+        """Handle chat submit event."""
+        
+        chat_history.append((message, ""))
+       
+        bot_message = self._chatfunction(message, chat_history)
+                        
+        for bot_message_part in bot_message:
+            # Append each part of the bot's response to the history
+            chat_history[-1] = (message, bot_message_part)        
+            yield None, chat_history  # Yield updated history after each part
+                        
+
+    def _handle_chat_clear(self):
+        """Handle chat clear button event."""
+        return None
+
+
+    def _handle_process_chain(self, text_input):
+        """Handle the document chain processing."""
+        # Your chain processing logic here
+        listdata = self._documentfunction(text_input)
+                
+        data = [(i, receipe) for i, receipe in enumerate(listdata)]
+        return data
+            
+        
