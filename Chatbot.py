@@ -1,8 +1,9 @@
+from xxlimited import foo
 from langchain_core.output_parsers import StrOutputParser 
 from operator import itemgetter
 from langchain_core.prompts import PromptTemplate
 from typing import List, Union
-from langchain_core.runnables import RunnableLambda, RunnableAssign
+from langchain_core.runnables import RunnableLambda, RunnableAssign, RunnableBranch
 import concurrent.futures
 import threading
 
@@ -34,8 +35,7 @@ class ChatbotWithHistory:
         self.systemmessage = '''        
             <|begin_of_text|>
             <|start_header_id|>system<|end_header_id|>
-            Du bist ein Freundlicher Koch, der sich ueber Essen unterhalten moechte.
-            Wenn die Nutzerin ein Rezept sucht, schreibe Strumpfhose in deine Antwort
+            Du bist ein Freundlicher Koch, der sich am liebsten ueber Essen unterhaelt. Du redest aber auch gern ueber jedes andere Thema.          
             <|eot_id|>
             '''
     
@@ -54,11 +54,40 @@ class ChatbotWithHistory:
     def stream(self, state: dict):
         # state['message'] = user message: str
         # state['history'] = history: [[(user) None, (agent) "Hello you!"]] (List of Lists)
+        
+        branch = RunnableBranch(
+            #(condition, runnable)
+            (lambda x: x['message'].startswith('retrieval:'), lambda x: x.upper()),
+            (lambda x: x['message'].startswith('soppinglist:'), lambda x: x + 1),            
+            lambda x: self.chat_bot(x)
+        )
+        for token in branch.stream(state):
+            yield token
+
+        # branch = RunnableBranch(   
+        #     branches={
+        #         "chatbot": model,
+        #         "retrieval": model,
+        #         "soppinglist": model,
+        #     },
+        #     select_branch=lambda inputs: state_machine.get_state()  # Dynamic state selection
+       
+        
+
+
+
+
+        # state['message'] = user message: str
+        # state['history'] = history: [[(user) None, (agent) "Hello you!"]] (List of Lists)
+        
+  
+    def chat_bot(self, state):
+        """ standard chatbot with 5 message history """
         historystring = self.build_history(state['history'][-5:])
         prompt = PromptTemplate.from_template(f"{self.systemmessage}{historystring}" + "<|start_header_id|>user<|end_header_id|>{input}<|eot_id|><|start_header_id|>assistant<|end_header_id|>")
         parser = StrOutputParser()
                         
-        chain = (            
+        return (            
             { 
                 "input": itemgetter("message") 
             }             
@@ -66,16 +95,10 @@ class ChatbotWithHistory:
             | self.model                                  
             | parser
             )
-                
-        for token in chain.stream(state):                       
-            yield token
-
-
+    
     def build_history(self, history: List[List[Union[None, str]]]) -> str:              
         prompt = ""
         for messages in history:            
             usermessage, agentmessage = messages
             prompt += f"<|start_header_id|>user<|end_header_id|>{usermessage}<|eot_id|><|start_header_id|>assistant<|end_header_id|>{agentmessage}<|eot_id|>"            
         return prompt
-            
-  
