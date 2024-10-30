@@ -1,25 +1,17 @@
-import stat
 from langchain_community.llms import Ollama
 from UserInterface import UserInterface
 from VectorStore import VectorStore
 from Chatbot import ChatbotWithHistory
 
-
 from langchain_core.runnables import RunnableLambda, RunnableAssign, RunnableBranch
 
 modelname = "llama3.1:8b-instruct-q4_K_S"
 model = Ollama(model = modelname)
-
+chatbot = ChatbotWithHistory(model=model)
+chatbot.preloadModel()
 
 vector_store = VectorStore()
 chroma_db = vector_store.get_chromaDB()
-
-chatbot = ChatbotWithHistory(model=model)
-
-conversation_state = 0
-
-state = {}
-
 
 # branch = RunnableBranch(
 #     default= model,  # Default chain to run
@@ -31,6 +23,7 @@ state = {}
 #     select_branch=lambda inputs: state_machine.get_state()  # Dynamic state selection
 #     )
 
+state = {}
 def chat_gen(message, history=[], return_buffer=True):        
     buffer = "" 
             
@@ -64,7 +57,7 @@ def document_retrieve(text_input):
 # for response in chat_gen(test_question, return_buffer=False):
 #     print(response, end='')
 
-interface = UserInterface(chat_fn=chat_gen, documentretrieval_fn=document_retrieve)
+interface = UserInterface(chat_fn=chat_gen, doc_retrieval_fn=document_retrieve)
 interface.render()
 
 

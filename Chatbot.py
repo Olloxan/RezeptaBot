@@ -2,8 +2,11 @@ from langchain_core.output_parsers import StrOutputParser
 from operator import itemgetter
 from langchain_core.prompts import PromptTemplate
 from typing import List, Union
-
 from langchain_core.runnables import RunnableLambda, RunnableAssign
+import concurrent.futures
+import threading
+
+
 from functools import partial
 from rich.console import Console
 from rich.style import Style
@@ -35,8 +38,19 @@ class ChatbotWithHistory:
             Wenn die Nutzerin ein Rezept sucht, schreibe Strumpfhose in deine Antwort
             <|eot_id|>
             '''
+    
+    def preloadModel(self):
+        self.startup()
         
-
+    def startup(self):
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.submit(self.load_model)
+        
+    def load_model(self):
+        print("Loading model")
+        self.model.invoke("")
+        print("model loaded")
+    
     def stream(self, state: dict):
         # state['message'] = user message: str
         # state['history'] = history: [[(user) None, (agent) "Hello you!"]] (List of Lists)
