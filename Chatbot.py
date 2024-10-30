@@ -30,8 +30,9 @@ def PrintStructureWithLabel(preface="State: "):
     return RunnableLambda(partial(print_and_return, preface=preface))
 
 class ChatbotWithHistory:
-    def __init__(self, model):
+    def __init__(self, model, vector_store):
         self.model = model
+        self.vector_store = vector_store
         self.systemmessage = '''        
             <|begin_of_text|>
             <|start_header_id|>system<|end_header_id|>
@@ -57,26 +58,13 @@ class ChatbotWithHistory:
         
         branch = RunnableBranch(
             #(condition, runnable)
-            (lambda x: x['message'].startswith('retrieval:'), lambda x: x.upper()),
+            (lambda x: x['message'].startswith('retrieval:'), lambda x: self.somethingcollwithreceipe(x)),
             (lambda x: x['message'].startswith('soppinglist:'), lambda x: x + 1),            
             lambda x: self.chat_bot(x)
         )
         for token in branch.stream(state):
             yield token
-
-        # branch = RunnableBranch(   
-        #     branches={
-        #         "chatbot": model,
-        #         "retrieval": model,
-        #         "soppinglist": model,
-        #     },
-        #     select_branch=lambda inputs: state_machine.get_state()  # Dynamic state selection
-       
-        
-
-
-
-
+                   
         # state['message'] = user message: str
         # state['history'] = history: [[(user) None, (agent) "Hello you!"]] (List of Lists)
         
@@ -102,3 +90,7 @@ class ChatbotWithHistory:
             usermessage, agentmessage = messages
             prompt += f"<|start_header_id|>user<|end_header_id|>{usermessage}<|eot_id|><|start_header_id|>assistant<|end_header_id|>{agentmessage}<|eot_id|>"            
         return prompt
+    
+    def somethingcollwithreceipe(self, state):
+        """retrieve a list of receipe names from the json file based on the metadata"""
+        return None

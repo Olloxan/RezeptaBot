@@ -146,7 +146,16 @@ class UserInterface:
     
     def _handle_receipe_choice(self, index:str, chat_history:List[tuple]):
         # alles immer zurück an den chatbot senden
-        chat_history.append((index, index))
         
-        return None, chat_history
+        message = f"retrieval:{index}"
+        chat_history.append((message, ""))
+        
+        bot_message = self._chat_function(message, chat_history)
+        
+        for bot_message_part in bot_message:
+            # Append each part of the bot's response to the history
+            chat_history[-1] = (message, bot_message_part)        
+            yield None, chat_history   
+        
+        
         

@@ -5,12 +5,12 @@ from Chatbot import ChatbotWithHistory
 
 from langchain_core.runnables import RunnableLambda, RunnableAssign, RunnableBranch
 
+vector_store = VectorStore()
+
 modelname = "llama3.1:8b-instruct-q4_K_S"
 model = Ollama(model = modelname)
-chatbot = ChatbotWithHistory(model=model)
+chatbot = ChatbotWithHistory(model=model, vector_store=vector_store)
 chatbot.preloadModel()
-
-vector_store = VectorStore()
 
 state = {}
 
