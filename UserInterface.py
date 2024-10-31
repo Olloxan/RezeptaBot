@@ -1,3 +1,4 @@
+from email import message
 from typing import List
 from winreg import EnumValue
 import gradio as gr
@@ -92,7 +93,7 @@ class UserInterface:
         """Attach event handlers to buttons."""
     
         # Weekly plan dataframe
-        self.submit_btn_weekplan.click(fn=self._handle_dataframe_contents, inputs=self.data_frame_weekplan, outputs=self.msg)
+        self.submit_btn_weekplan.click(fn=self._handle_dataframe_contents, inputs=[self.data_frame_weekplan, self.chatbot], outputs=self.chatbot)
 
         # Chat submit and clear buttons
         self.submit.click(fn=self._handle_chat_submit, inputs=[self.msg, self.chatbot], outputs=[self.msg, self.chatbot])
@@ -107,12 +108,15 @@ class UserInterface:
         self.submit_btn_receipe_select.click(fn=self._handle_receipe_choice, inputs=[self.receipe_selection, self.chatbot],outputs=[self.receipe_selection, self.chatbot])
 
 ###################### left side: Week plan ######################
-    def _handle_dataframe_contents(self, dataframe:pd.DataFrame) -> List:
+    def _handle_dataframe_contents(self, dataframe:pd.DataFrame, chat_history:List[tuple]) -> List:
         """Return the DataFrame (Pandas Dataframe)."""        
         # soll an das Netzwerk gesendet werden, um die Einkaufsliste zu erstellen
+        message = f"shoppinglist:{dataframe.to_string(index=False)}"
+        
+        chat_history.append((None, " "))
         
         
-        return dataframe.to_string(index=False)
+        return chat_history
 
 ###################### center: Chatbot ######################
     def _handle_chat_submit(self, message:str, chat_history:List[tuple]):
@@ -148,13 +152,13 @@ class UserInterface:
         # alles immer zurück an den chatbot senden
         
         message = f"retrieval:{index}"
-        chat_history.append((message, ""))
+        chat_history.append((None, ""))
         
         bot_message = self._chat_function(message, chat_history)
         
         for bot_message_part in bot_message:
             # Append each part of the bot's response to the history
-            chat_history[-1] = (message, bot_message_part)        
+            chat_history[-1] = (None, bot_message_part)        
             yield None, chat_history   
         
         

@@ -31,6 +31,7 @@ class VectorStore:
         get the receipe with the given index from the current retrieval results.
         Retrieve all receipes with the same metadata from the database and return them as a list
         """
+        # todo: if docstore empty, return a corresponding message
         selected_receipe = self.documents_and_scores[int(index)]
         
 

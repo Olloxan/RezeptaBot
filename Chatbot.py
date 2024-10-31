@@ -54,7 +54,7 @@ class ChatbotWithHistory:
         branch = RunnableBranch(
             #(condition, runnable)
             (lambda state: state['message'].startswith('retrieval:'), lambda state: self.allReceipesOfThisWeek(state)),
-            (lambda state: state['message'].startswith('soppinglist:'), lambda x: x + 1),            
+            (lambda state: state['message'].startswith('soppinglist:'), lambda state: self.createShoppingList(state)),            
             lambda state: self.chat_bot(state)
         )
         for token in branch.stream(state):
@@ -99,3 +99,7 @@ class ChatbotWithHistory:
         joined_receipes = "\n\n".join(receipeList)
 
         return joined_receipes
+    
+    def createShoppingList(self, state):
+        """create a shopping list based on the selected receipes"""
+        pass
