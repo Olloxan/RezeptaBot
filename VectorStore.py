@@ -2,14 +2,14 @@ from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_core.documents import Document
 from typing import List, Tuple
-
+import chromadb 
 
 
 
 class VectorStore:
     def __init__(self) -> None:        
         self.embeddings = OllamaEmbeddings(model="mxbai-embed-large") 
-        self.db_path = 'Receipes'
+        self.db_path = 'Receipes/Chroma'
         self.chroma_db = Chroma(persist_directory=self.db_path, embedding_function=self.embeddings)        
         self.documents_and_scores : List[Tuple[Document, float]] = []
 
@@ -25,3 +25,24 @@ class VectorStore:
         for document, score in self.documents_and_scores:
             receipes.append(document.page_content)
         return receipes
+    
+    def get_receipe_List(self, index:int)->List[str]:
+        """
+        get the receipe with the given index from the current retrieval results.
+        Retrieve all receipes with the same metadata from the database and return them as a list
+        """
+        selected_receipe = self.documents_and_scores[int(index)]
+        
+
+        # Define the metadata filter
+        metadata_key = "source"  # Replace with the actual metadata key you're filtering by
+        metadata_value = selected_receipe[0].metadata[metadata_key]
+        # collection = self.chroma_db.get_collection("default")
+        # Query the collection with the filter
+                      
+        collection = self.chroma_db.get(
+            where={"source": metadata_value},
+            include=["documents"]
+            )
+                       
+        return collection["documents"]

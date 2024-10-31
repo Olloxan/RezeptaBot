@@ -33,12 +33,7 @@ class ChatbotWithHistory:
     def __init__(self, model, vector_store):
         self.model = model
         self.vector_store = vector_store
-        self.systemmessage = '''        
-            <|begin_of_text|>
-            <|start_header_id|>system<|end_header_id|>
-            Du bist ein Freundlicher Koch, der sich am liebsten ueber Essen unterhaelt. Du redest aber auch gern ueber jedes andere Thema.          
-            <|eot_id|>
-            '''
+       
     
     def preloadModel(self):
         self.startup()
@@ -58,21 +53,25 @@ class ChatbotWithHistory:
         
         branch = RunnableBranch(
             #(condition, runnable)
-            (lambda x: x['message'].startswith('retrieval:'), lambda x: self.somethingcollwithreceipe(x)),
-            (lambda x: x['message'].startswith('soppinglist:'), lambda x: x + 1),            
-            lambda x: self.chat_bot(x)
+            (lambda state: state['message'].startswith('retrieval:'), lambda state: self.allReceipesOfThisWeek(state)),
+            (lambda state: state['message'].startswith('soppinglist:'), lambda x: x + 1),            
+            lambda state: self.chat_bot(state)
         )
         for token in branch.stream(state):
             yield token
-                   
-        # state['message'] = user message: str
-        # state['history'] = history: [[(user) None, (agent) "Hello you!"]] (List of Lists)
-        
+                                 
   
     def chat_bot(self, state):
         """ standard chatbot with 5 message history """
+        systemmessage = '''        
+            <|begin_of_text|>
+            <|start_header_id|>system<|end_header_id|>
+            Du bist ein Freundlicher Koch, der sich am liebsten ueber Essen unterhaelt. Du redest aber auch gern ueber jedes andere Thema.          
+            <|eot_id|>
+            '''
+
         historystring = self.build_history(state['history'][-5:])
-        prompt = PromptTemplate.from_template(f"{self.systemmessage}{historystring}" + "<|start_header_id|>user<|end_header_id|>{input}<|eot_id|><|start_header_id|>assistant<|end_header_id|>")
+        prompt = PromptTemplate.from_template(f"{systemmessage}{historystring}" + "<|start_header_id|>user<|end_header_id|>{input}<|eot_id|><|start_header_id|>assistant<|end_header_id|>")
         parser = StrOutputParser()
                         
         return (            
@@ -91,6 +90,12 @@ class ChatbotWithHistory:
             prompt += f"<|start_header_id|>user<|end_header_id|>{usermessage}<|eot_id|><|start_header_id|>assistant<|end_header_id|>{agentmessage}<|eot_id|>"            
         return prompt
     
-    def somethingcollwithreceipe(self, state):
+    def allReceipesOfThisWeek(self, state):
         """retrieve a list of receipe names from the json file based on the metadata"""
-        return None
+        currentReceipeSelectionIndex = state['message'].split(":")[1]                        
+        # retrieve a list of receipes with the same metadata
+        receipeList = self.vector_store.get_receipe_List(currentReceipeSelectionIndex)
+        
+        joined_receipes = "\n\n".join(receipeList)
+
+        return joined_receipes
