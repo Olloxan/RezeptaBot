@@ -94,10 +94,10 @@ class ChatbotWithHistory:
         """retrieve a list of receipe names from the json file based on the metadata"""
         currentReceipeSelectionIndex = state['message'].split(":")[1]                        
         # retrieve a list of receipes with the same metadata
-        receipeList = self.vector_store.get_receipe_List(currentReceipeSelectionIndex)
+        receipeList, source = self.vector_store.get_receipe_List(currentReceipeSelectionIndex)
         
         joined_receipes = "\n\n".join(receipeList)
-
+        joined_receipes += f"\n\nSource: {source}"
         return joined_receipes
     
     def createShoppingList(self, state):

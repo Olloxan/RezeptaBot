@@ -38,6 +38,7 @@ class VectorStore:
         # Define the metadata filter
         metadata_key = "source"  # Replace with the actual metadata key you're filtering by
         metadata_value = selected_receipe[0].metadata[metadata_key]
+        source = metadata_value.split("\\")[-1]
         # collection = self.chroma_db.get_collection("default")
         # Query the collection with the filter
                       
@@ -46,4 +47,4 @@ class VectorStore:
             include=["documents"]
             )
                        
-        return collection["documents"]
+        return collection["documents"], source

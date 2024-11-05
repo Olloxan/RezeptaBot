@@ -141,7 +141,7 @@ class UserInterface:
 
 ###################### right side: Document retrieval ######################
     def _handle_retrieval_chain(self, text_input: str) -> List[tuple]: 
-        """Handle the document chain processing."""
+        """Document retrieval: Input any ingredient and get corresponding receipes"""
         # Your chain processing logic here
         listdata : List[str] = self._doc_retrieval_function(text_input)
                 
@@ -149,16 +149,18 @@ class UserInterface:
         return data
     
     def _handle_receipe_choice(self, index:str, chat_history:List[tuple]):
-        # alles immer zurück an den chatbot senden
+        """Select any index of displayed receipes and return the whole week including the name of the source document.
+        Uses a branch of the chatbot"""
         
         message = f"retrieval:{index}"
-        chat_history.append((None, ""))
+        selection = f"Auswahl: {index}"
+        chat_history.append((selection, ""))
         
         bot_message = self._chat_function(message, chat_history)
         
         for bot_message_part in bot_message:
             # Append each part of the bot's response to the history
-            chat_history[-1] = (None, bot_message_part)        
+            chat_history[-1] = (selection, bot_message_part)        
             yield None, chat_history   
         
         
