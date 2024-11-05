@@ -26,7 +26,7 @@ class VectorStore:
             receipes.append(document.page_content)
         return receipes
     
-    def get_receipe_List(self, index:int)->List[str]:
+    def get_receipe_List(self, index:int)->Tuple[List[str], str]:
         """
         get the receipe with the given index from the current retrieval results.
         Retrieve all receipes with the same metadata from the database and return them as a list

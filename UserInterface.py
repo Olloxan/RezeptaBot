@@ -111,12 +111,18 @@ class UserInterface:
     def _handle_dataframe_contents(self, dataframe:pd.DataFrame, chat_history:List[tuple]) -> List:
         """Return the DataFrame (Pandas Dataframe)."""        
         # soll an das Netzwerk gesendet werden, um die Einkaufsliste zu erstellen
-        message = f"shoppinglist:{dataframe.to_string(index=False)}"
+        json_data = dataframe.to_json(orient="split")
+        message = f"shoppinglist:{json_data}"
         
         chat_history.append((None, " "))
+        # call zum chatbot mit dem serialisierten json
+        bot_message = self._chat_function(message, chat_history)
         
-        
-        return chat_history
+        for bot_message_part in bot_message:
+            # Append each part of the bot's response to the history
+            chat_history[-1] = (None, bot_message_part)        
+            yield None, chat_history    
+                
 
 ###################### center: Chatbot ######################
     def _handle_chat_submit(self, message:str, chat_history:List[tuple]):
