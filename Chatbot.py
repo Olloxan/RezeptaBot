@@ -1,3 +1,4 @@
+﻿
 from ast import Dict
 from langchain_core.output_parsers import StrOutputParser 
 from operator import itemgetter
@@ -56,7 +57,7 @@ class ChatbotWithHistory:
         branch = RunnableBranch(
             #(condition, runnable)
             (lambda state: state['message'].startswith('retrieval:'), lambda state: self.allReceipesOfThisWeek(state)),
-            (lambda state: state['message'].startswith('soppinglist:'), lambda state: self.createShoppingList(state)),            
+            (lambda state: state['message'].startswith('shoppinglist:'), lambda state: self.createShoppingList(state)),            
             lambda state: self.chat_bot(state)
         )
         for token in branch.stream(state):
@@ -104,8 +105,15 @@ class ChatbotWithHistory:
     
     def createShoppingList(self, state):
         """create a shopping list based on the selected receipes"""
-        json_data = state['message'].split("soppinglist:")[1]
+        
+        # restore pandas dataframe from json
+        json_data = state['message'].split("shoppinglist:")[1]
         df_restored = pd.read_json(json_data, orient="split")
+        
+        # get list of receipe names from vector store
+        receipes_and_ingredients = self.vector_store.get_receipes_from_last_source()
+
+        self.receipe_name_mapping(df_restored, receipes_and_ingredients)
         
         # List_of_mapped_receipes = mapping_function(state['pd dataframe'], Ingredient_List) -> llm
         # count all receipes
@@ -115,6 +123,63 @@ class ChatbotWithHistory:
 
         pass
     
-    def myCoolMappingfunction(self, shortList, longList)->:
-        """mapping function for the ingredients of the receipes"""
+    def receipe_name_mapping(self, short_receipe_names:pd.DataFrame, receipe_name_list:List[str])->List[str]:
+        """assignes each entry of the short_name_list the corresponding complete receipe name
+           e.g. curry -> Kokosnuss Curry Eintopf mit Tofu
+        """
+        # Morgens, Mittags, Abends, Nachmittags 
+        short_name_list = ";".join(short_receipe_names["Nachmittags"])
+        
+        full_name_array = [name.split(" - Ingredients")[0].strip() for name in receipe_name_list]
+        full_receipe_names = ";".join(full_name_array)
+        # 02.08.2024-3400kcal.pdf
+        # Schoko-Smoothie mit Beeren
+        prompt = PromptTemplate.from_template( 
+            """
+            <|begin_of_text|>
+            <|start_header_id|>system<|end_header_id|>
+            Du bist ein Roboter, der Anweisungen Exakt befolgt. Du antwortest nur das, was gefordert ist. Keine Erklaerungen und zusaetzlichen Informationen.
+            <|start_header_id|>user<|end_header_id|>
+            Hier ist eine Rezeptnamenliste: 
+            Schoko-Smoothie mit Beeren ;Lotus Biscoff Protein-Käsekuchen ;Avocado Toast mit Linsensprossen ;Grüner Tofusalat 
+            mit Quinoa ;Pasta mit veganer Wurst und sonnengetrockneter Tomate ;Pad Thai mit Tofu ;Kokosnuss Curry Eintopf mit 
+            Tofu ;Reisnudeln mit Tofu und Gemüse ;Veganer Sushi-Bowl mit Tofu ;Kartoffel-Spinat-Auflauf ;Bananen-Eiscreme mit 
+            Erdnussbutter ;Schnelles, selbstgemachtes Erdbeer-Eis ;Mango und Passionsfrucht-Hüttenkäse-Eis am Stiel 
+            .\n\nvergleiche die Rezeptnamenliste mit jedem der folgenden Begriffe: Pasta vegane Wurst;Pasta vegane Wurst;Pasta 
+            vegane Wurst;Auflauf;Auflauf;Auflauf;Auflauf;Curry.\n\nErstelle eine neue Liste mit den Namen aus der Rezeptnamenliste.
+            Nutze als Trennzeichen ein ;
+            <|eot_id|>
+            <|start_header_id|>assistent<|end_header_id|>
+            Pasta mit veganer Wurst und sonnengetrockneter Tomate; Pasta mit veganer Wurst und sonnengetrockneter Tomate; Pasta mit veganer Wurst und sonnengetrockneter Tomate; Kartoffel-Spinat-Auflauf; Kartoffel-Spinat-Auflauf; Kartoffel-Spinat-Auflauf; Kartoffel-Spinat-Auflauf; Kokosnuss Curry Eintopf mit Tofu.
+            <|eot_id|>
+            <|start_header_id|>user<|end_header_id|>
+            Hier ist eine Rezeptnamenliste: {full_receipe_names}.
+
+            vergleiche die Rezeptnamenliste mit jedem der folgenden Begriffe: {short_name_list}.
+
+            Ersetze jeden Begriff mit dem Element aus der Rezeptnamenliste, der am besten passt.
+            <|eot_id|>
+            <|start_header_id|>assistent<|end_header_id|>
+            """   
+            )
+                        
+        parser = StrOutputParser()
+        chain = (
+            {
+                "short_name_list" : itemgetter("short_name_list"),
+                "full_receipe_names" : itemgetter("full_receipe_names")
+            }
+            | prompt            
+            | self.model
+            | parser
+        )
+        
+        while(True):            
+            output = chain.invoke({"short_name_list" : short_name_list, "full_receipe_names" : full_receipe_names})
+            output_array = output.split(";")
+            if set(output_array).issubset(set(full_name_array)):
+                # nebenbei auch noch die Anzahl checken
+                # das LLM hat nen Punkt am Ende gemacht
+                break
+        
         pass

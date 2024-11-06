@@ -1,3 +1,4 @@
+from ast import Tuple
 from email import message
 from typing import List
 from winreg import EnumValue
@@ -31,12 +32,12 @@ class UserInterface:
                         gr.Markdown("### Week Plan")
                         
                         initial_data = pd.DataFrame({
-                                        "Tag": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag", "Montag"],
-                                        "Morgens": ["Milchshake", "", "", "", "", "", "", ""],
-                                        "Mittags": ["Spagetti", "", "", "", "", "", "", ""],
-                                        "Abends": ["Sandwich", "", "", "", "", "", "", ""],
-                                        "Nachmittags": ["Energy Balls", "", "", "", "", "", "", ""]
-                                        })
+                        "Tag": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag", "Montag"],
+                        "Morgens": ["Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie"],  
+                        "Mittags": ["Pasta vegane Wurst", "Pasta vegane Wurst", "Pasta vegane Wurst", "Auflauf", "Auflauf", "Auflauf", "Auflauf", "Curry"],
+                        "Abends": ["Avocado toast", "Avocado toast", "Avocado toast", "Avocado toast", "Curry", "Curry", "Curry", ""],
+                        "Nachmittags": ["Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", ""]
+                        })
                         
                         self.data_frame_weekplan = gr.DataFrame(value=initial_data, headers=["Tag", "Morgens", "Mittags", "Abends", "Nachmittags"], label="Editable Table", interactive=True, show_label=False)
                         self.submit_btn_weekplan = gr.Button("Process Week Plan")
@@ -108,7 +109,7 @@ class UserInterface:
         self.submit_btn_receipe_select.click(fn=self._handle_receipe_choice, inputs=[self.receipe_selection, self.chatbot],outputs=[self.receipe_selection, self.chatbot])
 
 ###################### left side: Week plan ######################
-    def _handle_dataframe_contents(self, dataframe:pd.DataFrame, chat_history:List[tuple]) -> List:
+    def _handle_dataframe_contents(self, dataframe:pd.DataFrame, chat_history:List[tuple]):
         """Return the DataFrame (Pandas Dataframe)."""        
         # soll an das Netzwerk gesendet werden, um die Einkaufsliste zu erstellen
         json_data = dataframe.to_json(orient="split")
