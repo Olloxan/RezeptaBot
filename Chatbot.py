@@ -1,15 +1,14 @@
 ﻿
-from ast import Dict
 from langchain_core.output_parsers import StrOutputParser 
 from operator import itemgetter
 from langchain_core.prompts import PromptTemplate
-from typing import List, Union
+from typing import Counter, List, Union, Dict
 from langchain_core.runnables import RunnableLambda, RunnableAssign, RunnableBranch
 import pandas as pd
 import concurrent.futures
 import threading
 from VectorStore import VectorStore
-
+from Promptloader import Promptloader as pl
 
 from functools import partial
 from rich.console import Console
@@ -113,10 +112,12 @@ class ChatbotWithHistory:
         # get list of receipe names from vector store
         receipes_and_ingredients = self.vector_store.get_receipes_from_last_source()
 
-        self.receipe_name_mapping(df_restored, receipes_and_ingredients)
-        
         # List_of_mapped_receipes = mapping_function(state['pd dataframe'], Ingredient_List) -> llm
+        meals = self.receipe_name_mapping(df_restored, receipes_and_ingredients)
+                
         # count all receipes
+        mealcount = Counter(meals)
+        
         # List with receipenames and complex ingredients -> llm
         # multiply all ingredients
         # bundle all ingredients and add to list -> list: external, mapping: llm
@@ -126,12 +127,8 @@ class ChatbotWithHistory:
     def receipe_name_mapping(self, short_receipe_names:pd.DataFrame, receipe_name_list:List[str])->List[str]:
         """assignes each entry of the short_name_list the corresponding complete receipe name
            e.g. curry -> Kokosnuss Curry Eintopf mit Tofu
-        """
-        # Morgens, Mittags, Abends, Nachmittags 
-        short_name_list = ";".join(short_receipe_names["Nachmittags"])
-        
-        full_name_array = [name.split(" - Ingredients")[0].strip() for name in receipe_name_list]
-        full_receipe_names = ";".join(full_name_array)
+        """        
+        pl.load_from_file("ReceipeNameMapping.txt")
         # 02.08.2024-3400kcal.pdf
         # Schoko-Smoothie mit Beeren
         prompt = PromptTemplate.from_template( 
@@ -141,10 +138,10 @@ class ChatbotWithHistory:
             Du bist ein Roboter, der Anweisungen Exakt befolgt. Du antwortest nur das, was gefordert ist. Keine Erklaerungen und zusaetzlichen Informationen.
             <|start_header_id|>user<|end_header_id|>
             Hier ist eine Rezeptnamenliste: 
-            Schoko-Smoothie mit Beeren ;Lotus Biscoff Protein-Käsekuchen ;Avocado Toast mit Linsensprossen ;Grüner Tofusalat 
-            mit Quinoa ;Pasta mit veganer Wurst und sonnengetrockneter Tomate ;Pad Thai mit Tofu ;Kokosnuss Curry Eintopf mit 
-            Tofu ;Reisnudeln mit Tofu und Gemüse ;Veganer Sushi-Bowl mit Tofu ;Kartoffel-Spinat-Auflauf ;Bananen-Eiscreme mit 
-            Erdnussbutter ;Schnelles, selbstgemachtes Erdbeer-Eis ;Mango und Passionsfrucht-Hüttenkäse-Eis am Stiel 
+            Schoko-Smoothie mit Beeren; Lotus Biscoff Protein-Käsekuchen; Avocado Toast mit Linsensprossen; Grüner Tofusalat 
+            mit Quinoa; Pasta mit veganer Wurst und sonnengetrockneter Tomate; Pad Thai mit Tofu; Kokosnuss Curry Eintopf mit 
+            Tofu; Reisnudeln mit Tofu und Gemüse; Veganer Sushi-Bowl mit Tofu; Kartoffel-Spinat-Auflauf; Bananen-Eiscreme mit 
+            Erdnussbutter; Schnelles, selbstgemachtes Erdbeer-Eis; Mango und Passionsfrucht-Hüttenkäse-Eis am Stiel 
             .\n\nvergleiche die Rezeptnamenliste mit jedem der folgenden Begriffe: Pasta vegane Wurst;Pasta vegane Wurst;Pasta 
             vegane Wurst;Auflauf;Auflauf;Auflauf;Auflauf;Curry.\n\nErstelle eine neue Liste mit den Namen aus der Rezeptnamenliste.
             Nutze als Trennzeichen ein ;
@@ -161,25 +158,60 @@ class ChatbotWithHistory:
             <|eot_id|>
             <|start_header_id|>assistent<|end_header_id|>
             """   
-            )
-                        
-        parser = StrOutputParser()
+            )                
+        parser = StrOutputParser()                
         chain = (
             {
                 "short_name_list" : itemgetter("short_name_list"),
                 "full_receipe_names" : itemgetter("full_receipe_names")
             }
             | prompt            
-            | self.model
+            | self.model            
             | parser
         )
         
-        while(True):            
-            output = chain.invoke({"short_name_list" : short_name_list, "full_receipe_names" : full_receipe_names})
-            output_array = output.split(";")
-            if set(output_array).issubset(set(full_name_array)):
-                # nebenbei auch noch die Anzahl checken
-                # das LLM hat nen Punkt am Ende gemacht
-                break
+        full_name_list:List[str] = [name.split(" - Ingredients")[0].strip() for name in receipe_name_list]
+        full_receipe_names = "; ".join(full_name_list)
         
-        pass
+        # Morgens, Mittags, Abends, Nachmittags 
+        mealtimes = ["Morgens", "Mittags", "Abends", "Nachmittags"]
+        meals = []
+        for mealtime in mealtimes:            
+            short_name_list = [item for item in short_receipe_names[mealtime] if item != ""]
+            short_name_list_string = "; ".join(short_name_list)
+            counter = 0
+            while(True):
+                print(f"running loop with {mealtime} for the {counter}th time")
+                
+                output = chain.invoke({"short_name_list" : short_name_list_string, "full_receipe_names" : full_receipe_names})
+                
+                output_list:List[str] = self.clean_string_and_convert_to_list(output)
+                if self.output_conditions_are_met(output_list, short_name_list, full_name_list):                
+                    break
+                counter += 1
+            meals.extend(output_list)
+        return meals
+    
+    def clean_string_and_convert_to_list(self, string:str)->List[str]:                 
+        string = (string
+                  .replace("\n", "")
+                  .replace(".", "")
+                  )
+        output_list = [item.strip() for item in string.split(";")]
+        return output_list
+    
+    def output_conditions_are_met(self, output_list:List[str], short_name_list:List[str], full_name_list:List[str])->bool:
+        """Output conditions: 
+            1. is the output list a subset of the full name list
+            2. have the output list and the list of short names the same length            
+        """
+        conditions:List[bool] = []
+        conditions.append(set(output_list).issubset(set(full_name_list)))
+        missing_elements = set(output_list) - set(full_name_list)
+        print(f"missing elements: {missing_elements}")
+        debuglen1 = len(output_list)
+        debuglen2 = len(short_name_list)
+        print(f"length list1: {debuglen1}")
+        print(f"length list2: {debuglen2}")
+        conditions.append(len(output_list) == len(short_name_list))                            
+        return all(conditions)
