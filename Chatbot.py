@@ -8,7 +8,7 @@ import pandas as pd
 import concurrent.futures
 import threading
 from VectorStore import VectorStore
-from Promptloader import Promptloader as pl
+from Promptloader import Promptloader
 
 from functools import partial
 from rich.console import Console
@@ -35,6 +35,7 @@ class ChatbotWithHistory:
     def __init__(self, model, vector_store: VectorStore):
         self.model = model
         self.vector_store = vector_store
+        self.promptloader = Promptloader()
        
     
     def preloadModel(self):
@@ -121,44 +122,19 @@ class ChatbotWithHistory:
         # List with receipenames and complex ingredients -> llm
         # multiply all ingredients
         # bundle all ingredients and add to list -> list: external, mapping: llm
-
+        # Ich will nen Looger
+        
         pass
     
     def receipe_name_mapping(self, short_receipe_names:pd.DataFrame, receipe_name_list:List[str])->List[str]:
         """assignes each entry of the short_name_list the corresponding complete receipe name
            e.g. curry -> Kokosnuss Curry Eintopf mit Tofu
         """        
-        pl.load_from_file("ReceipeNameMapping.txt")
+        
         # 02.08.2024-3400kcal.pdf
         # Schoko-Smoothie mit Beeren
-        prompt = PromptTemplate.from_template( 
-            """
-            <|begin_of_text|>
-            <|start_header_id|>system<|end_header_id|>
-            Du bist ein Roboter, der Anweisungen Exakt befolgt. Du antwortest nur das, was gefordert ist. Keine Erklaerungen und zusaetzlichen Informationen.
-            <|start_header_id|>user<|end_header_id|>
-            Hier ist eine Rezeptnamenliste: 
-            Schoko-Smoothie mit Beeren; Lotus Biscoff Protein-Käsekuchen; Avocado Toast mit Linsensprossen; Grüner Tofusalat 
-            mit Quinoa; Pasta mit veganer Wurst und sonnengetrockneter Tomate; Pad Thai mit Tofu; Kokosnuss Curry Eintopf mit 
-            Tofu; Reisnudeln mit Tofu und Gemüse; Veganer Sushi-Bowl mit Tofu; Kartoffel-Spinat-Auflauf; Bananen-Eiscreme mit 
-            Erdnussbutter; Schnelles, selbstgemachtes Erdbeer-Eis; Mango und Passionsfrucht-Hüttenkäse-Eis am Stiel 
-            .\n\nvergleiche die Rezeptnamenliste mit jedem der folgenden Begriffe: Pasta vegane Wurst;Pasta vegane Wurst;Pasta 
-            vegane Wurst;Auflauf;Auflauf;Auflauf;Auflauf;Curry.\n\nErstelle eine neue Liste mit den Namen aus der Rezeptnamenliste.
-            Nutze als Trennzeichen ein ;
-            <|eot_id|>
-            <|start_header_id|>assistent<|end_header_id|>
-            Pasta mit veganer Wurst und sonnengetrockneter Tomate; Pasta mit veganer Wurst und sonnengetrockneter Tomate; Pasta mit veganer Wurst und sonnengetrockneter Tomate; Kartoffel-Spinat-Auflauf; Kartoffel-Spinat-Auflauf; Kartoffel-Spinat-Auflauf; Kartoffel-Spinat-Auflauf; Kokosnuss Curry Eintopf mit Tofu.
-            <|eot_id|>
-            <|start_header_id|>user<|end_header_id|>
-            Hier ist eine Rezeptnamenliste: {full_receipe_names}.
-
-            vergleiche die Rezeptnamenliste mit jedem der folgenden Begriffe: {short_name_list}.
-
-            Ersetze jeden Begriff mit dem Element aus der Rezeptnamenliste, der am besten passt.
-            <|eot_id|>
-            <|start_header_id|>assistent<|end_header_id|>
-            """   
-            )                
+        prompt = PromptTemplate.from_template(self.promptloader.read_from_file("ReceipeNameMapping.txt"))                
+        
         parser = StrOutputParser()                
         chain = (
             {

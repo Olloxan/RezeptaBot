@@ -60,7 +60,8 @@ class UserInterface:
                         self.retrieval_input = gr.Textbox(
                             label="Enter text for document chain",
                             placeholder="Type your input here...",
-                            show_label=False
+                            show_label=False,
+                            value="Schoko-Smoothie mit Beeren"
                         )
                         self.submit_btn_retrieve = gr.Button("Retrieve Receipes")
                         
@@ -74,7 +75,8 @@ class UserInterface:
                         self.receipe_selection = gr.Textbox(
                             label="Enter text for document chain",
                             placeholder="Type your input here...",
-                            show_label=False
+                            show_label=False,
+                            value="0"
                         )
                         self.submit_btn_receipe_select = gr.Button("Retrieve Receipes")
                 
