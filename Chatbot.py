@@ -4,6 +4,7 @@ from operator import itemgetter
 from langchain_core.prompts import PromptTemplate
 from typing import Counter, List, Union, Dict
 from langchain_core.runnables import RunnableLambda, RunnableAssign, RunnableBranch
+from langchain.docstore.document import Document
 import pandas as pd
 import concurrent.futures
 import threading
@@ -122,7 +123,9 @@ class ChatbotWithHistory:
         mealcount = Counter(meals)
         
         # Load all receipes from json with the corresponding source
-        
+        all_receipes = self.loader.load_documents_from_disk("Receipes/AllReceipes.json")
+        source = self.vector_store.get_last_selected_source()
+        filtered_receipes = self.filter_documents_by_source(all_receipes, source)
         # extract Complex Ingredients with Receipe Names from every receipe -> llm
 
         # Result is a list of all ingredients with the corresponding receipe name
@@ -199,3 +202,20 @@ class ChatbotWithHistory:
         print(f"length list2: {debuglen2}")
         conditions.append(len(output_list) == len(short_name_list))                            
         return all(conditions)
+    
+    def filter_documents_by_source(self, documents:List[Document], filterstr:str)->List[Document]:
+        """
+        Filters a list of documents to include only those where 'source' in metadata contains the specified filter string.
+    
+        Parameters:
+            documents (list of Document): The list of Document objects to filter.
+            filterstr (str): The substring to search for within each document's 'source' metadata.
+
+        Returns:
+            list of Document: A list of documents with 'source' metadata containing the specified substring.
+        """
+        filtered_docs = [
+            doc for doc in documents
+            if filterstr in doc.metadata.get('source', '')
+        ]
+        return filtered_docs

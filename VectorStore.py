@@ -44,9 +44,12 @@ class VectorStore:
         return self.get_receipes_from_last_source(), source
     
     def get_receipes_from_last_source(self)->List[str]:
-        """get all receipes from the last selected source"""
+        """get all receipes strings from the last selected source"""
         collection = self.chroma_db.get(
             where={"source": self.last_selected_source},
             include=["documents"]
             )
         return collection["documents"]
+    
+    def get_last_selected_source(self)->str:
+        return self.last_selected_source
