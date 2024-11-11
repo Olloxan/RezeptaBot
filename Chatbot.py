@@ -8,7 +8,7 @@ import pandas as pd
 import concurrent.futures
 import threading
 from VectorStore import VectorStore
-from Promptloader import Promptloader
+from FileLoader import FileLoader
 
 from functools import partial
 from rich.console import Console
@@ -35,7 +35,7 @@ class ChatbotWithHistory:
     def __init__(self, model, vector_store: VectorStore):
         self.model = model
         self.vector_store = vector_store
-        self.promptloader = Promptloader()
+        self.loader = FileLoader()
        
     
     def preloadModel(self):
@@ -63,7 +63,7 @@ class ChatbotWithHistory:
         for token in branch.stream(state):
             yield token
                                  
-  
+    ################################ Chatbot ################################
     def chat_bot(self, state):
         """ standard chatbot with 5 message history """
         systemmessage = '''        
@@ -93,6 +93,7 @@ class ChatbotWithHistory:
             prompt += f"<|start_header_id|>user<|end_header_id|>{usermessage}<|eot_id|><|start_header_id|>assistant<|end_header_id|>{agentmessage}<|eot_id|>"            
         return prompt
     
+    ################################ retrieval ################################
     def allReceipesOfThisWeek(self, state: Dict)->str:
         """retrieve a list of receipe names from the json file based on the metadata"""
         currentReceipeSelectionIndex = state['message'].split(":")[1]                        
@@ -103,6 +104,7 @@ class ChatbotWithHistory:
         joined_receipes += f"\n\nSource: {source}"
         return joined_receipes
     
+    ################################ shoppinglist ################################
     def createShoppingList(self, state):
         """create a shopping list based on the selected receipes"""
         
@@ -116,10 +118,16 @@ class ChatbotWithHistory:
         # List_of_mapped_receipes = mapping_function(state['pd dataframe'], Ingredient_List) -> llm
         meals = self.receipe_name_mapping(df_restored, receipes_and_ingredients)
                 
-        # count all receipes
+        # count all receipes -> Dict with receipenames as Key and count as value
         mealcount = Counter(meals)
         
-        # List with receipenames and complex ingredients -> llm
+        # Load all receipes from json with the corresponding source
+        
+        # extract Complex Ingredients with Receipe Names from every receipe -> llm
+
+        # Result is a list of all ingredients with the corresponding receipe name
+        
+
         # multiply all ingredients
         # bundle all ingredients and add to list -> list: external, mapping: llm
         # Ich will nen Looger
@@ -133,7 +141,7 @@ class ChatbotWithHistory:
         
         # 02.08.2024-3400kcal.pdf
         # Schoko-Smoothie mit Beeren
-        prompt = PromptTemplate.from_template(self.promptloader.read_from_file("ReceipeNameMapping.txt"))                
+        prompt = PromptTemplate.from_template(self.loader.read_from_file("ReceipeNameMapping.txt"))                
         
         parser = StrOutputParser()                
         chain = (
