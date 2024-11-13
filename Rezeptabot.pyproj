@@ -25,7 +25,9 @@
     <Compile Include="BaseModels.py" />
     <Compile Include="Chatbot.py" />
     <Compile Include="FileLoader.py" />
+    <Compile Include="Logger.py" />
     <Compile Include="RunnableRawIngredientExtracor.py" />
+    <Compile Include="RunnableRecipeMapper.py" />
     <Compile Include="ui\configuration.py" />
     <Compile Include="ui\select_folder.py" />
     <Compile Include="ui\user_interface.py" />

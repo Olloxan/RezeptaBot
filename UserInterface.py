@@ -117,14 +117,14 @@ class UserInterface:
         json_data = dataframe.to_json(orient="split")
         message = f"shoppinglist:{json_data}"
         
-        chat_history.append((None, " "))
+        chat_history.append(("None", ""))
         # call zum chatbot mit dem serialisierten json
         bot_message = self._chat_function(message, chat_history)
         
         for bot_message_part in bot_message:
             # Append each part of the bot's response to the history
-            chat_history[-1] = (None, bot_message_part)        
-            yield None, chat_history    
+            chat_history[-1] = ("test", bot_message_part)        
+            yield chat_history    
                 
 
 ###################### center: Chatbot ######################
