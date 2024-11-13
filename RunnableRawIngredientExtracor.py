@@ -11,14 +11,14 @@ class RunnableRawIngredientExtracor(Runnable):
     def invoke(self, state: dict)->str:
         """expected dict: state['input'] = document"""
         # Step 1: Perform Extraction with LLM        
-        unparsed_rawingredients = self.extract_ingredients(state['input'])
+        unparsed_rawingredients = self.extract_ingredients().invoke(state['input'])
         
         # Step 2: Parsing the extracted information
         parsed_data = self.parse_extracted_ingredients(unparsed_rawingredients)        
         return parsed_data
 
-    def extract_ingredients(self, input):
-        return (self.extraction_prompt | self.llm).invoke(input)
+    def extract_ingredients(self):
+        return (self.extraction_prompt | self.llm)
     
     def parse_extracted_ingredients(self, extracted_text):
         # split if multiple ingrdients objects

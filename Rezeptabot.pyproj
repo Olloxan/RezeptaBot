@@ -22,13 +22,16 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BaseModels.py" />
     <Compile Include="Chatbot.py" />
     <Compile Include="FileLoader.py" />
+    <Compile Include="RunnableRawIngredientExtracor.py" />
     <Compile Include="ui\configuration.py" />
     <Compile Include="ui\select_folder.py" />
     <Compile Include="ui\user_interface.py" />
     <Compile Include="UserInterface.py" />
     <Compile Include="Rezeptabot.py" />
+    <Compile Include="utils.py" />
     <Compile Include="VectorStore.py" />
   </ItemGroup>
   <ItemGroup>
