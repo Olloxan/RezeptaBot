@@ -2,6 +2,7 @@ from langchain_core.runnables import Runnable
 from langchain_core.output_parsers import StrOutputParser 
 from typing import List
 from Logger import Logger
+from Runnables import RunnableDebugger as Debugger
 
 class RunnableRecipeMapper(Runnable):
     def __init__(self, llm, extraction_prompt):
@@ -9,6 +10,7 @@ class RunnableRecipeMapper(Runnable):
         self.prompt = extraction_prompt
         self.outputparser = StrOutputParser()      
         self.logger = Logger()
+        self.debugger = Debugger()
     
     def invoke(self, state: dict):
         """ state['short_recipe_names'] = pd.DataFrame
@@ -53,7 +55,7 @@ class RunnableRecipeMapper(Runnable):
         return {'str' : short_recipe_name_string, 'list' : short_recipe_names}
     
     def runchain(self)->Runnable:
-        return ( self.prompt | self.llm | self.outputparser)
+        return ( self.prompt | self.debugger.Runnable_PrintTokencout() | self.llm | self.outputparser)
     
     def clean_string_and_convert_to_list(self, string:str)->List[str]:                 
         string = (string

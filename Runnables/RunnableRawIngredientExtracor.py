@@ -1,24 +1,32 @@
 from langchain_core.runnables import Runnable
 import re
 from langchain.output_parsers import PydanticOutputParser
+from Runnables import RunnableDebugger as Debugger
+from BaseModels import RawIngredientList
 
 class RunnableRawIngredientExtracor(Runnable):
     def __init__(self, schema_class, llm, extraction_prompt):
         self.llm = llm
         self.extraction_prompt = extraction_prompt
         self.output_validator_parser = PydanticOutputParser(pydantic_object=schema_class)
+        self.debugger = Debugger()
            
-    def invoke(self, state: dict)->str:
-        """expected dict: state['input'] = document"""
-        # Step 1: Perform Extraction with LLM        
-        unparsed_rawingredients = self.extract_ingredients().invoke(state['input'])
+    def invoke(self, state: dict)->list[RawIngredientList]:
+        """expected dict: state['input'] = List[document]"""
         
-        # Step 2: Parsing the extracted information
-        parsed_data = self.parse_extracted_ingredients(unparsed_rawingredients)        
-        return parsed_data
+        ingredient_list = []
+        for i, page in enumerate(state['input']):    
+         
+            # Step 1: Perform Extraction with LLM        
+            unparsed_rawingredients = self.extract_ingredients().invoke(page)
+        
+            # Step 2: Parsing the extracted information
+            parsed_data = self.parse_extracted_ingredients(unparsed_rawingredients)        
+            ingredient_list.extend(parsed_data)
+        return ingredient_list
 
     def extract_ingredients(self):
-        return (self.extraction_prompt | self.llm)
+        return (self.extraction_prompt | self.debugger.Runnable_PrintTokencout() | self.llm)
     
     def parse_extracted_ingredients(self, extracted_text):
         # split if multiple ingrdients objects

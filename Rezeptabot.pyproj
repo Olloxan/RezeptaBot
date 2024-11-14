@@ -26,8 +26,10 @@
     <Compile Include="Chatbot.py" />
     <Compile Include="FileLoader.py" />
     <Compile Include="Logger.py" />
-    <Compile Include="RunnableRawIngredientExtracor.py" />
-    <Compile Include="RunnableRecipeMapper.py" />
+    <Compile Include="Runnables\RunnableDebugger.py" />
+    <Compile Include="Runnables\RunnableRawIngredientExtracor.py" />
+    <Compile Include="Runnables\RunnableRecipeMapper.py" />
+    <Compile Include="Runnables\__init__.py" />
     <Compile Include="ui\configuration.py" />
     <Compile Include="ui\select_folder.py" />
     <Compile Include="ui\user_interface.py" />
@@ -40,6 +42,7 @@
     <InterpreterReference Include="CondaEnv|CondaEnv|rezeptEnv" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Runnables\" />
     <Folder Include="ui\" />
     <Folder Include="ui\assets\" />
     <Folder Include="ui\www\" />

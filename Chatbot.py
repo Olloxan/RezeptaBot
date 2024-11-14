@@ -9,10 +9,9 @@ from numpy import promote_types
 import pandas as pd
 import concurrent.futures
 import threading
-from RunnableRawIngredientExtracor import RunnableRawIngredientExtracor
+from Runnables import RunnableRawIngredientExtracor, RunnableRecipeMapper
 from VectorStore import VectorStore
 from FileLoader import FileLoader
-from RunnableRecipeMapper import RunnableRecipeMapper
 from BaseModels import RawIngredientList
 
 from functools import partial
@@ -139,12 +138,11 @@ class ChatbotWithHistory:
         filtered_receipes = self.filter_documents_by_source(all_receipes, source)
         
         prompt = PromptTemplate.from_template(self.loader.read_from_file("RawIngredientExtraction.txt"))
-        myTest = RunnableRawIngredientExtracor(RawIngredientList, self.model, prompt)
+        rawIngredientExtracor = RunnableRawIngredientExtracor(RawIngredientList, self.model, prompt)
 
-        for i, page in enumerate(selected_pages):    
-            state['input'] = page        
-    
-            ahh = myTest.invoke(state) #--> change to list
+        state['input'] = filtered_receipes
+        raw_ingredients = rawIngredientExtracor.invoke(state)
+       
         
         
         # extract Complex Ingredients with Receipe Names from every receipe -> llm
@@ -157,7 +155,7 @@ class ChatbotWithHistory:
         # bundle all ingredients and add to list -> list: external, mapping: llm
         # Ich will nen Looger
         
-        return "\n".join(output)
+        return '\n'.join(f"{item}: {count}" for item, count in mealcount.items())
           
     
     def filter_documents_by_source(self, documents:List[Document], filterstr:str)->List[Document]:
