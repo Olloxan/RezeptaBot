@@ -25,10 +25,10 @@ class RunnableRawIngredientExtracor(Runnable):
             ingredient_list.extend(parsed_data)
         return ingredient_list
 
-    def extract_ingredients(self):
+    def extract_ingredients(self)->Runnable:
         return (self.extraction_prompt | self.debugger.Runnable_PrintTokencout() | self.llm)
     
-    def parse_extracted_ingredients(self, extracted_text):
+    def parse_extracted_ingredients(self, extracted_text:str)->list[RawIngredientList]:
         # split if multiple ingrdients objects
         result = re.sub(r'}\s*{', '}\n{', extracted_text)            
         json_objects = result.split('}\n{')                    
@@ -40,7 +40,7 @@ class RunnableRawIngredientExtracor(Runnable):
             separated_objects.append(raw_ingredient)                
         return separated_objects       
 
-    def clean_and_format_output(self, string):
+    def clean_and_format_output(self, string:str)->str:
         if '{' not in string: string = '{' + string
         if '}' not in string: string = string + '}'
         string = (string

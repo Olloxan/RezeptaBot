@@ -12,7 +12,7 @@ class RunnableRecipeMapper(Runnable):
         self.logger = Logger()
         self.debugger = Debugger()
     
-    def invoke(self, state: dict):
+    def invoke(self, state: dict)->list[str]:
         """ state['short_recipe_names'] = pd.DataFrame
             state['recipe_names_with_ingredients'] = full_recipe_names (with ingredients)
         """
