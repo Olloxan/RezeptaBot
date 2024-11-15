@@ -14,7 +14,7 @@ class RunnableComplexIngredientExtractor(Runnable):
         self.logger = Logger()
 
     def invoke(self, state:dict):
-        """expected dict: state['input'] = List[RawIngredientList]"""
+        """ expected dict: state['input'] = List[RawIngredientList] """
         complex_ingredient_list = []        
         for i, rawIngredientList in enumerate(state['input']):    
             success = True

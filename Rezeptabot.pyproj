@@ -26,6 +26,7 @@
     <Compile Include="Chatbot.py" />
     <Compile Include="FileLoader.py" />
     <Compile Include="Logger.py" />
+    <Compile Include="Runnables\RunnableComplexIngredientExtractor.py" />
     <Compile Include="Runnables\RunnableDebugger.py" />
     <Compile Include="Runnables\RunnableRawIngredientExtracor.py" />
     <Compile Include="Runnables\RunnableRecipeMapper.py" />
