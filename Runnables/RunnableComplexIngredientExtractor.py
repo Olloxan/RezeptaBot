@@ -34,7 +34,7 @@ class RunnableComplexIngredientExtractor(Runnable):
                     success = False
             if not success:
                 raise Exception("Failed to extract data")        
-        complex_ingredient_list.append(parsed_data)
+            complex_ingredient_list.append(parsed_data)
         return complex_ingredient_list
 
     def extract_complex_ingredients(self)->Runnable:

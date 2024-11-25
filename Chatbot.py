@@ -9,7 +9,7 @@ from numpy import promote_types
 import pandas as pd
 import concurrent.futures
 import threading
-from Runnables import RunnableComplexIngredientExtractor, RunnableRawIngredientExtracor, RunnableRecipeMapper
+from Runnables import RunnableComplexIngredientExtractor, RunnableRawIngredientExtracor, RunnableRecipeMapper, RunnableMultiplier
 from VectorStore import VectorStore
 from FileLoader import FileLoader
 from BaseModels import RawIngredientList, ComplexIngredientList
@@ -149,12 +149,13 @@ class ChatbotWithHistory:
         prompt = PromptTemplate.from_template(self.loader.read_from_file("IngredientConversion.txt"))
         complexIngredientExtracor = RunnableComplexIngredientExtractor(ComplexIngredientList, self.model, prompt)
         state['input'] = raw_ingredients
-        complexIngredients = complexIngredientExtracor.invoke(state)
-        
-
-
+        complexIngredients = complexIngredientExtracor.invoke(state)        
         # Result is a list of all ingredients with the corresponding receipe name
         
+        multiplier = RunnableMultiplier()
+        state['input'] = complexIngredients
+        state['count'] = mealcount
+        multiplied = multiplier.invoke(state)
 
         # multiply all ingredients
         # bundle all ingredients and add to list -> list: external, mapping: llm
