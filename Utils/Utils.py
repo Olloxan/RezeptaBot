@@ -3,7 +3,7 @@ import json
 from langchain.docstore.document import Document
 from typing import List
 
-
+from BaseModels import RawIngredientList
 
 # Load Structure from file
 def load_object(path):
@@ -42,6 +42,23 @@ def store_documents_on_disk(documents:List[Document], file_path: str) -> None:
     # Write the documents to a JSON file
     with open(file_path, 'w', encoding="utf-8") as f:
         json.dump(serializable_docs, f)
+
+# Function to save a list of RawIngredientList objects as JSON
+def store_raw_ingredient_lists_on_disk(obj_list: List[RawIngredientList], file_path: str):   
+    dict_list = [obj.dict() for obj in obj_list]
+    with open(file_path, "w", encoding="utf-8") as file:
+        json.dump(dict_list, file, ensure_ascii=False)  # Save as pretty-printed JSON
+
+# Function to load JSON and populate a list of RawIngredientList objects
+def load_raw_ingredient_lists_from_disk(file_path: str) -> List[RawIngredientList]:    
+    with open(file_path, "r", encoding="utf-8") as file:
+        data = json.load(file)
+    # Convert the list of dictionaries to a list of RawIngredientList objects
+    return [RawIngredientList(**item) for item in data]
+
+
+
+
 
 # Store text in file
 def write_to_file(text:str, filename:str) -> None:
