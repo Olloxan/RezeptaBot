@@ -9,10 +9,10 @@ from numpy import promote_types
 import pandas as pd
 import concurrent.futures
 import threading
-from Runnables import RunnableRawIngredientExtracor, RunnableRecipeMapper
+from Runnables import RunnableComplexIngredientExtractor, RunnableRawIngredientExtracor, RunnableRecipeMapper
 from VectorStore import VectorStore
 from FileLoader import FileLoader
-from BaseModels import RawIngredientList
+from BaseModels import RawIngredientList, ComplexIngredientList
 
 from functools import partial
 from rich.console import Console
@@ -136,16 +136,21 @@ class ChatbotWithHistory:
         all_receipes = self.loader.load_documents_from_disk("Receipes/AllReceipes.json")
         source = self.vector_store.get_last_selected_source()
         filtered_receipes = self.filter_documents_by_source(all_receipes, source)
-        
+        # --> abspeichern zum Testen
+
         prompt = PromptTemplate.from_template(self.loader.read_from_file("RawIngredientExtraction.txt"))
         rawIngredientExtracor = RunnableRawIngredientExtracor(RawIngredientList, self.model, prompt)
 
         state['input'] = filtered_receipes
         raw_ingredients = rawIngredientExtracor.invoke(state)
-       
-        
+        # --> abspeichern zum Testen
         
         # extract Complex Ingredients with Receipe Names from every receipe -> llm
+        prompt = PromptTemplate.from_template(self.loader.read_from_file("IngredientConversion.txt"))
+        complexIngredientExtracor = RunnableComplexIngredientExtractor(ComplexIngredientList, self.model, prompt)
+        state['input'] = raw_ingredients
+        complexIngredients = complexIngredientExtracor.invoke(state)
+        
 
 
         # Result is a list of all ingredients with the corresponding receipe name
@@ -153,7 +158,7 @@ class ChatbotWithHistory:
 
         # multiply all ingredients
         # bundle all ingredients and add to list -> list: external, mapping: llm
-        # Ich will nen Looger
+        
         
         return '\n'.join(f"{item}: {count}" for item, count in mealcount.items())
           

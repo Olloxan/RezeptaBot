@@ -28,7 +28,7 @@ class RunnableRawIngredientExtracor(Runnable):
         return ingredient_list
 
     def extract_ingredients(self)->Runnable:
-        return (self.extraction_prompt | self.debugger.Runnable_PrintTokencout() | self.llm)
+        return (self.format_instruction_inserter | self.extraction_prompt | self.debugger.Runnable_PrintTokencout() | self.llm | self.debugger.Runnable_PrintStructureWithLabel(label="Raw Extraction"))
     
     def parse_extracted_ingredients(self, extracted_text:str)->list[RawIngredientList]:
         # split if multiple ingrdients objects

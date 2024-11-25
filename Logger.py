@@ -4,21 +4,32 @@ from datetime import datetime
 
 class Logger:
     _instance = None
-    _log_file = 'logs/log.txt'  # Default log file name
+    _log_file = None 
 
-    def __new__(cls, log_file='logs/log.txt'):
+    def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._log_file = log_file
-            cls._ensure_log_file_exists(cls._log_file)
+            cls._instance._initialize_logger()
         return cls._instance
+   
 
     @classmethod
-    def _ensure_log_file_exists(cls, log_file):
-        # Create an empty log file if it does not exist
-        if not os.path.exists(log_file):
-            with open(log_file, 'w') as f:
-                pass
+    def _initialize_logger(cls):
+        # Generate a unique log file name with a timestamp
+        timestamp = datetime.now().strftime('%d.%m.%Y_%H-%M-%S')
+        cls._log_file = f"logs/log_{timestamp}.txt"
+        
+        # Ensure the log directory exists (optional)
+        log_dir = os.path.dirname(cls._log_file)
+        if log_dir and not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+
+        # Create the log file
+        with open(cls._log_file, 'w') as f:
+            pass  # Create an empty log file
+
+        print(f"Logger initialized. Log file: {cls._log_file}")
+
 
     @staticmethod
     def _get_timestamp():

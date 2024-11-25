@@ -37,13 +37,14 @@ class RunnableDebugger:
 
     def Runnable_PrintTextWithLabel(self, label="State: "):
         def print_and_return(x, label=""):
-            print(f"{label}{x}")
+            self.logger.LogMessage(f"{label}{x}")
             return x
         return RunnableLambda(partial(print_and_return, label=label))
 
     def Runnable_PrintStructureWithLabel(self, label="State: "):
         def print_and_return(x, label=""):
             prettyPrint(label, x)
+            self.logger.LogMessage(f"{label}{x}")
             return x
         return RunnableLambda(partial(print_and_return, label=label))
 

@@ -38,7 +38,7 @@ class RunnableComplexIngredientExtractor(Runnable):
         return complex_ingredient_list
 
     def extract_complex_ingredients(self)->Runnable:
-        return (self.format_instruction_inserter | self.extraction_prompt | self.debugger.Runnable_PrintTokencout() | self.llm )
+        return (self.format_instruction_inserter | self.extraction_prompt | self.debugger.Runnable_PrintTokencout() | self.llm | self.debugger.Runnable_PrintStructureWithLabel())
     
 
     def parse_extracted_ingredients(self, extracted_text):
