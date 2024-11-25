@@ -5,7 +5,7 @@ from langchain_core.prompts import PromptTemplate
 from typing import Counter, List, Union, Dict
 from langchain_core.runnables import RunnableLambda, RunnableAssign, RunnableBranch
 from langchain.docstore.document import Document
-from numpy import promote_types
+
 import pandas as pd
 import concurrent.futures
 import threading

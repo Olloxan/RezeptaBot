@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>5848bdb6-ad33-43d0-90c2-0692aadc2448</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Rezeptabot.py</StartupFile>
+    <StartupFile>RecipePrepare.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -26,6 +26,7 @@
     <Compile Include="Chatbot.py" />
     <Compile Include="FileLoader.py" />
     <Compile Include="Logger.py" />
+    <Compile Include="RecipePrepare.py" />
     <Compile Include="Runnables\RunnableComplexIngredientExtractor.py" />
     <Compile Include="Runnables\RunnableMultiplier.py" />
     <Compile Include="Runnables\RunnableDebugger.py" />
@@ -37,13 +38,15 @@
     <Compile Include="ui\user_interface.py" />
     <Compile Include="UserInterface.py" />
     <Compile Include="Rezeptabot.py" />
-    <Compile Include="utils.py" />
+    <Compile Include="Utils\Utils.py" />
+    <Compile Include="Utils\__init__.py" />
     <Compile Include="VectorStore.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="CondaEnv|CondaEnv|rezeptEnv" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Utils\" />
     <Folder Include="Runnables\" />
     <Folder Include="ui\" />
     <Folder Include="ui\assets\" />
