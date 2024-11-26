@@ -1,5 +1,3 @@
-from pydoc import Doc
-from venv import logger
 from langchain_core.runnables import Runnable
 from langchain_core.prompts import PromptTemplate
 from langchain.docstore.document import Document

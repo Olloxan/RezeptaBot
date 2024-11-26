@@ -8,11 +8,10 @@ class RawIngredientList(BaseModel):
     ingredients: List[str] = Field([], description="List of ingredients in the recipe")
     
 class Ingredient(BaseModel):
-    name: str                          # Name of the ingredient
-    quantity: Optional[Decimal] = Field(None)          # The amount of the ingredient, must be greater than 0
-    unit: Optional[str]                          # Unit of the ingredient (e.g., Stück, Dose, Tasse)
-    weight: Decimal = Field(...)  # Optional weight in grams, must be 0 or greater
-    weight_unit: str          # Optional unit for the weight (e.g., g), can be None if weight is not provided
+    name: str                                   # Name of the ingredient
+    quantity: Optional[float] = Field(ge=0)     # The amount of the ingredient, must be greater than 0
+    unit: Optional[str]                         # Unit of the ingredient (e.g., Stück, Dose, Tasse)
+    weight: float = Field(..., ge=0)            # Optional weight in grams, must be 0 or greater    
     category: str
 
 class ComplexIngredientList(BaseModel):

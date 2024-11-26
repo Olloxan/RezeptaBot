@@ -3,7 +3,7 @@ import json
 from langchain.docstore.document import Document
 from typing import List
 
-from BaseModels import RawIngredientList
+from BaseModels import RawIngredientList, ComplexIngredientList
 
 # Load Structure from file
 def load_object(path):
@@ -55,6 +55,20 @@ def load_raw_ingredient_lists_from_disk(file_path: str) -> List[RawIngredientLis
         data = json.load(f)
     # Convert the list of dictionaries to a list of RawIngredientList objects
     return [RawIngredientList(**item) for item in data]
+
+def store_complex_ingredient_list_on_disk(obj_list: List[ComplexIngredientList], file_path: str) -> None:
+    # Convert the Pydantic model to a dictionary
+    dict_list = [obj.dict() for obj in obj_list]    
+    # Write the dictionary as a JSON object to the file
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(dict_list, f, ensure_ascii=False)
+
+def load_complex_ingredient_list_from_disk(file_path: str) -> ComplexIngredientList:
+    # Read the JSON file
+    with open(file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    # Convert the dictionary back to a Pydantic model
+    return [ComplexIngredientList(**item) for item in data]
 
 # Store text in file
 def write_to_file(text:str, filename:str) -> None:

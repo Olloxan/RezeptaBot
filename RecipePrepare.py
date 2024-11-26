@@ -1,7 +1,7 @@
 from langchain_community.llms import Ollama
 from langchain_core.prompts import PromptTemplate
-from Utils import load_documents_from_disk, read_from_file, store_raw_ingredient_lists_on_disk, store_documents_on_disk
-from Runnables import RunnableRawIngredientExtracor, RunnableRecipeSeparator
+from Utils import store_documents_on_disk, load_documents_from_disk, read_from_file, store_raw_ingredient_lists_on_disk, load_raw_ingredient_lists_from_disk, store_complex_ingredient_list_on_disk
+from Runnables import RunnableRawIngredientExtracor, RunnableRecipeSeparator, RunnableComplexIngredientExtractor
 
 
 # Prepare Environment
@@ -21,13 +21,23 @@ llm = Ollama(model = modelname)
 # store_documents_on_disk(docs, "logs/Separated.json")
 
 ###### Part 2 #######
-pages = load_documents_from_disk("logs/Separated.json")
-state = {'input': pages}
+# pages = load_documents_from_disk("logs/Separated.json")
+# state = {'input': pages}
 
 
-rawIngredientExtracor = RunnableRawIngredientExtracor(llm)
+# rawIngredientExtracor = RunnableRawIngredientExtracor(llm)
 
-raw_ingredients = rawIngredientExtracor.invoke(state)
-store_raw_ingredient_lists_on_disk(raw_ingredients, 'logs/RawIngredients.json')
+# raw_ingredients = rawIngredientExtracor.invoke(state)
+# store_raw_ingredient_lists_on_disk(raw_ingredients, 'logs/RawIngredients.json')
 
 ###### Part 3 #######
+
+rawingredients = load_raw_ingredient_lists_from_disk('logs/RawIngredients.json')
+state = {'input': rawingredients}
+
+
+complexIngredientExtractor = RunnableComplexIngredientExtractor(llm)
+
+complexIngredients = complexIngredientExtractor.invoke(state)
+
+store_complex_ingredient_list_on_disk(complexIngredients, 'logs/ComplexIngredients.json')
