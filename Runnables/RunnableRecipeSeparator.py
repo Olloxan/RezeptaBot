@@ -24,7 +24,7 @@ class RunnableRecipeSeparator(Runnable):
         
         for i, document in enumerate(state['input']):   
             try:
-                self.logger.LogMessage(f"Separating document {i}")
+                self.logger.LogMessage(f"Separating: document {i} from {len(state['input'])-1}")
             
                 semikolon_separated_recipenames = self.separate_recipe().invoke({"input" : document})
             
