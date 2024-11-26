@@ -4,7 +4,7 @@ from Utils import load_documents_from_disk, read_from_file, store_raw_ingredient
 from Runnables import RunnableRawIngredientExtracor
 from BaseModels import RawIngredientList
 
-
+# Prepare Environment
 modelname = "llama3.1:8b-instruct-q4_K_S"
 llm = Ollama(model = modelname)
 

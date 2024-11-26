@@ -3,7 +3,7 @@ from langchain.docstore.document import Document
 
 class FileLoader():
     def __init__(self) -> None:
-        self.directory = "Receipes/Prompts/"
+        self.directory = "Recipes/Prompts/"
         pass
     
     def read_from_file(self, filename:str) -> str:        

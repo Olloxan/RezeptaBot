@@ -60,7 +60,7 @@ class ChatbotWithHistory:
         
         branch = RunnableBranch(
             #(condition, runnable)
-            (lambda state: state['message'].startswith('retrieval:'), lambda state: self.allReceipesOfThisWeek(state)),
+            (lambda state: state['message'].startswith('retrieval:'), lambda state: self.allRecipesOfThisWeek(state)),
             (lambda state: state['message'].startswith('shoppinglist:'), lambda state: self.createShoppingList(state)),            
             lambda state: self.chat_bot(state)
         )
@@ -98,50 +98,50 @@ class ChatbotWithHistory:
         return prompt
     
     ################################ retrieval ################################
-    def allReceipesOfThisWeek(self, state: Dict)->str:
+    def allRecipesOfThisWeek(self, state: Dict)->str:
         """retrieve a list of receipe names from the json file based on the metadata"""
-        currentReceipeSelectionIndex = state['message'].split(":")[1]                        
-        # retrieve a list of receipes with the same metadata
-        receipeList, source = self.vector_store.get_receipe_List(currentReceipeSelectionIndex)
+        currentRecipeSelectionIndex = state['message'].split(":")[1]                        
+        # retrieve a list of recipes with the same metadata
+        recipeList, source = self.vector_store.get_receipe_List(currentRecipeSelectionIndex)
         
-        joined_receipes = "\n\n".join(receipeList)
-        joined_receipes += f"\n\nSource: {source}"
-        return joined_receipes
+        joined_recipes = "\n\n".join(recipeList)
+        joined_recipes += f"\n\nSource: {source}"
+        return joined_recipes
     
     ################################ shoppinglist ################################
     def createShoppingList(self, state):
-        """create a shopping list based on the selected receipes"""
+        """create a shopping list based on the selected recipes"""
         
         # restore pandas dataframe from json
         json_data = state['message'].split("shoppinglist:")[1]
         df_restored = pd.read_json(json_data, orient="split")
         
         # get list of receipe names from vector store
-        receipes_and_ingredients = self.vector_store.get_receipes_from_last_source()
+        recipes_and_ingredients = self.vector_store.get_recipes_from_last_source()
 
-        # List_of_mapped_receipes = mapping_function(state['pd dataframe'], Ingredient_List) -> llm
+        # List_of_mapped_recipes = mapping_function(state['pd dataframe'], Ingredient_List) -> llm
         prompt = PromptTemplate.from_template(self.loader.read_from_file("ReceipeNameMapping.txt"))
         recipeMapper = RunnableRecipeMapper(self.model, prompt)
         
         state={}
         state['short_recipe_names'] = df_restored
-        state['recipe_names_with_ingredients'] = receipes_and_ingredients 
+        state['recipe_names_with_ingredients'] = recipes_and_ingredients 
         output = recipeMapper.invoke(state)
         
                 
-        # count all receipes -> Dict with receipenames as Key and count as value
+        # count all recipes -> Dict with receipenames as Key and count as value
         mealcount = Counter(output)
         
-        # Load all receipes from json with the corresponding source
-        all_receipes = self.loader.load_documents_from_disk("Receipes/AllReceipes.json")
+        # Load all recipes from json with the corresponding source
+        all_recipes = self.loader.load_documents_from_disk("Recipes/AllRecipes.json")
         source = self.vector_store.get_last_selected_source()
-        filtered_receipes = self.filter_documents_by_source(all_receipes, source)
+        filtered_recipes = self.filter_documents_by_source(all_recipes, source)
         # --> abspeichern zum Testen
 
         prompt = PromptTemplate.from_template(self.loader.read_from_file("RawIngredientExtraction.txt"))
         rawIngredientExtracor = RunnableRawIngredientExtracor(RawIngredientList, self.model, prompt)
 
-        state['input'] = filtered_receipes
+        state['input'] = filtered_recipes
         raw_ingredients = rawIngredientExtracor.invoke(state)
         # --> abspeichern zum Testen
         

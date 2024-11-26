@@ -63,7 +63,7 @@ class UserInterface:
                             show_label=False,
                             value="Schoko-Smoothie mit Beeren"
                         )
-                        self.submit_btn_retrieve = gr.Button("Retrieve Receipes")
+                        self.submit_btn_retrieve = gr.Button("Retrieve Recipes")
                         
                         initial_data = pd.DataFrame({
                                         "Nr.": [""],
@@ -78,7 +78,7 @@ class UserInterface:
                             show_label=False,
                             value="0"
                         )
-                        self.submit_btn_receipe_select = gr.Button("Retrieve Receipes")
+                        self.submit_btn_receipe_select = gr.Button("Retrieve Recipes")
                 
                 # Attach button event handlers
                 self._attach_button_events()               
@@ -150,7 +150,7 @@ class UserInterface:
 
 ###################### right side: Document retrieval ######################
     def _handle_retrieval_chain(self, text_input: str) -> List[tuple]: 
-        """Document retrieval: Input any ingredient and get corresponding receipes"""
+        """Document retrieval: Input any ingredient and get corresponding recipes"""
         # Your chain processing logic here
         listdata : List[str] = self._doc_retrieval_function(text_input)
                 
@@ -158,7 +158,7 @@ class UserInterface:
         return data
     
     def _handle_receipe_choice(self, index:str, chat_history:List[tuple]):
-        """Select any index of displayed receipes and return the whole week including the name of the source document.
+        """Select any index of displayed recipes and return the whole week including the name of the source document.
         Uses a branch of the chatbot"""
         
         message = f"retrieval:{index}"
