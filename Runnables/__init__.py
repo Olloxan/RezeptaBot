@@ -3,3 +3,4 @@ from .RunnableRecipeMapper import RunnableRecipeMapper
 from .RunnableRawIngredientExtracor import RunnableRawIngredientExtracor
 from .RunnableComplexIngredientExtractor import RunnableComplexIngredientExtractor
 from .RunnableMultiplier import RunnableMultiplier
+from .RunnableRecipeSeparator import RunnableRecipeSeparator
