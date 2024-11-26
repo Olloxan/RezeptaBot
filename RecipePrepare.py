@@ -8,13 +8,17 @@ from BaseModels import RawIngredientList
 modelname = "llama3.1:8b-instruct-q4_K_S"
 llm = Ollama(model = modelname)
 
+# load documents from json format
 pages = load_documents_from_disk('Recipes/Json/AllRecipes.json')
-selected_pages = [pages[i] for i in [60, 1, 0]]
+selected_pages = [pages[i] for i in [0, 1, 2, 4, 60]]
 state = {'input': selected_pages}
 
 
 recipeSeparator = RunnableRecipeSeparator(llm)
 docs = recipeSeparator.invoke(state)
+
+
+
 store_documents_on_disk(docs, "logs/Separated.json")
 # prompt = PromptTemplate.from_template(read_from_file("Recipes/Prompts/RawIngredientExtraction.txt"))
 # rawIngredientExtracor = RunnableRawIngredientExtracor(RawIngredientList, llm, prompt)

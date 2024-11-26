@@ -23,20 +23,23 @@ class RunnableRecipeSeparator(Runnable):
         recipes:list[Document] = []
         
         for i, document in enumerate(state['input']):   
+            try:
+                self.logger.LogMessage(f"Separating document {i}")
             
-            self.logger.LogMessage(f"Separating document {i}")
+                semikolon_separated_recipenames = self.separate_recipe().invoke({"input" : document})
             
-            semikolon_separated_recipenames = self.separate_recipe().invoke({"input" : document})
+                recipe_names:list[str] = semikolon_separated_recipenames.split(";")
+                recipe_names = [item for item in recipe_names if item != 'leer']            
             
-            recipe_names:list[str] = semikolon_separated_recipenames.split(";")
-            recipe_names = [item for item in recipe_names if item != 'leer']            
-            
-            # split_recipes:list[str] = [document.page_content.split(recipe_name) for recipe_name in recipe_names]
-            page_content = document.page_content
-            split_recipes = self.split_recipes_by_name(page_content, recipe_names)
+                # split_recipes:list[str] = [document.page_content.split(recipe_name) for recipe_name in recipe_names]
+                page_content = document.page_content
+                split_recipes = self.split_recipes_by_name(page_content, recipe_names)
 
-            documents = [Document(page_content=recipe, metadata=document.metadata) for recipe in split_recipes if recipe != '']
-            recipes.extend(documents)    
+                documents = [Document(page_content=recipe, metadata=document.metadata) for recipe in split_recipes if recipe != '']
+                recipes.extend(documents)    
+            except Exception as exc:
+                self.logger.LogException(exc, f"Error processing document {i}. Recipe names are: {', '.join(recipe_names)}")
+                recipes.append(document)
         
         return recipes
 
