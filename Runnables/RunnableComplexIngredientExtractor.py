@@ -23,11 +23,11 @@ class RunnableComplexIngredientExtractor(Runnable):
         
         complex_ingredient_list = []                
         for i, rawIngredientList in enumerate(state['input']):    
-            self.logger.LogMessage(f"Extracting Complex Ingredients for: {rawIngredientList.recipe_name}")
+            self.logger.LogMessage(f"Extracting Complex Ingredients for: {rawIngredientList.recipe_name}. Recipe {i} from {len(state['input'])}")
             success = True
-            for i in range(self.num_extraction_tries): # try multiple times to extract the data
+            for j in range(self.num_extraction_tries): # try multiple times to extract the data
                 try:
-                    self.logger.LogMessage(f"Try: {i}")
+                    self.logger.LogMessage(f"Try: {j}")
                     success = True
                                                          
                     parsed_data = self.extract_complex_ingredients().invoke({'input' : rawIngredientList})
