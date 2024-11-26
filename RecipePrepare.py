@@ -11,7 +11,7 @@ llm = Ollama(model = modelname)
 ###### Part 1 #######
 ## load documents from json format
 # pages = load_documents_from_disk('Recipes/Json/AllRecipes.json')
-# selected_pages = [pages[i] for i in [0, 1, 2, 4, 60]]
+# selected_pages = [pages[i] for i in [0, 1, 2, 4, 60, 212]]
 # state = {'input': selected_pages}
 
 
@@ -29,3 +29,5 @@ rawIngredientExtracor = RunnableRawIngredientExtracor(llm)
 
 raw_ingredients = rawIngredientExtracor.invoke(state)
 store_raw_ingredient_lists_on_disk(raw_ingredients, 'logs/RawIngredients.json')
+
+###### Part 3 #######

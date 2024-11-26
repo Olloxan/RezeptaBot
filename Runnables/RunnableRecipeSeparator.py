@@ -30,8 +30,7 @@ class RunnableRecipeSeparator(Runnable):
             
                 recipe_names:list[str] = semikolon_separated_recipenames.split(";")
                 recipe_names = [item for item in recipe_names if item != 'leer']            
-            
-                # split_recipes:list[str] = [document.page_content.split(recipe_name) for recipe_name in recipe_names]
+                            
                 page_content = document.page_content
                 split_recipes = self.split_recipes_by_name(page_content, recipe_names)
 

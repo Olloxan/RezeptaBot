@@ -1,6 +1,5 @@
 from langchain_core.runnables import Runnable
 from langchain_core.runnables.passthrough import RunnableAssign
-import re
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 
