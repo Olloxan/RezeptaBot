@@ -45,8 +45,8 @@ class Logger:
         print(f"{timestamp} Message: {message}")
         
         # Write the message to the log file in JSON format
-        with open(Logger._log_file, 'a') as f:
-            f.write(json.dumps(log_message) + ',\n')
+        with open(Logger._log_file, 'a', encoding="utf-8") as f:
+            f.write(json.dumps(log_message, ensure_ascii=False) + ',\n')
 
     @staticmethod
     def LogException(exception: Exception, message: str = "processing failed"):
@@ -59,5 +59,5 @@ class Logger:
         print(f"{timestamp} Error: {message}. Exception: {exception_message}")
         
         # Write the error message to the log file in JSON format
-        with open(Logger._log_file, 'a') as f:
-            f.write(json.dumps(log_message) + ',\n')
+        with open(Logger._log_file, 'a', encoding="utf-8") as f:
+            f.write(json.dumps(log_message, ensure_ascii=False) + ',\n')

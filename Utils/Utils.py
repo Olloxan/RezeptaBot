@@ -56,10 +56,6 @@ def load_raw_ingredient_lists_from_disk(file_path: str) -> List[RawIngredientLis
     # Convert the list of dictionaries to a list of RawIngredientList objects
     return [RawIngredientList(**item) for item in data]
 
-
-
-
-
 # Store text in file
 def write_to_file(text:str, filename:str) -> None:
     """Schreibt den Text in eine Textdatei."""
