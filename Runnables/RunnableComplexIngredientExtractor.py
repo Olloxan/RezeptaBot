@@ -5,13 +5,13 @@ from langchain.output_parsers import PydanticOutputParser
 
 from langchain_core.prompts import PromptTemplate
 from Logger import Logger
-from Utils import read_from_file
+from Utils import read_text_from_file
 from BaseModels import ComplexIngredientList
 
 class RunnableComplexIngredientExtractor(Runnable):
     def __init__(self, llm):
         self.llm = llm
-        self.extraction_prompt = PromptTemplate.from_template(read_from_file("Recipes/Prompts/ComplexIngredientExtraction_prompt.txt"))
+        self.extraction_prompt = PromptTemplate.from_template(read_text_from_file("Recipes/Prompts/ComplexIngredientExtraction_prompt.txt"))
         self.output_validator_parser = PydanticOutputParser(pydantic_object=ComplexIngredientList)
         self.format_instruction_inserter = RunnableAssign({'format_instructions' : lambda x: self.output_validator_parser.get_format_instructions()})   
         self.debugger = Debugger()

@@ -133,23 +133,25 @@ class ChatbotWithHistory:
         mealcount = Counter(output)
         
         # Load all recipes from json with the corresponding source
-        all_recipes = self.loader.load_documents_from_disk("Recipes/AllRecipes.json")
-        source = self.vector_store.get_last_selected_source()
-        filtered_recipes = self.filter_documents_by_source(all_recipes, source)
+        # all_recipes = self.loader.load_documents_from_disk("Recipes/AllRecipes.json")
+        # source = self.vector_store.get_last_selected_source()
+        # filtered_recipes = self.filter_documents_by_source(all_recipes, source)
         # --> abspeichern zum Testen
 
-        prompt = PromptTemplate.from_template(self.loader.read_from_file("RawIngredientExtraction.txt"))
-        rawIngredientExtracor = RunnableRawIngredientExtracor(RawIngredientList, self.model, prompt)
+        # prompt = PromptTemplate.from_template(self.loader.read_from_file("RawIngredientExtraction.txt"))
+        # rawIngredientExtracor = RunnableRawIngredientExtracor(RawIngredientList, self.model, prompt)
 
-        state['input'] = filtered_recipes
-        raw_ingredients = rawIngredientExtracor.invoke(state)
+        # state['input'] = filtered_recipes
+        # raw_ingredients = rawIngredientExtracor.invoke(state)
         # --> abspeichern zum Testen
         
         # extract Complex Ingredients with Receipe Names from every receipe -> llm
-        prompt = PromptTemplate.from_template(self.loader.read_from_file("IngredientConversion.txt"))
-        complexIngredientExtracor = RunnableComplexIngredientExtractor(ComplexIngredientList, self.model, prompt)
-        state['input'] = raw_ingredients
+        # prompt = PromptTemplate.from_template(self.loader.read_from_file("IngredientConversion.txt"))
+        # complexIngredientExtracor = RunnableComplexIngredientExtractor(ComplexIngredientList, self.model, prompt)
+        # state['input'] = raw_ingredients
+        
         complexIngredients = complexIngredientExtracor.invoke(state)        
+        
         # Result is a list of all ingredients with the corresponding receipe name
         
         multiplier = RunnableMultiplier()

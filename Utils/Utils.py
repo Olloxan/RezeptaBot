@@ -5,7 +5,7 @@ from typing import List
 
 from BaseModels import RawIngredientList, ComplexIngredientList
 
-# Load Structure from file
+# Object
 def load_object(path):
     """Load the tokenizer from a file."""
     with open(path, "rb") as f:
@@ -13,14 +13,14 @@ def load_object(path):
     print(f"stored_object loaded from {path}")
     return stored_object
 
-# Safe Structure to file
 def save_object(object_to_store, path):
     """Save the tokenizer to a file."""
     with open(path, "wb") as f:
         pickle.dump(object_to_store, f)
     print(f"Tokenizer saved to {path}")
 
-# Load documents from file
+
+# Documents
 def load_documents_from_disk(file_path:str) -> List[Document]:
     # Read the JSON file
     with open(file_path, 'r', encoding="utf-8") as f:
@@ -31,7 +31,6 @@ def load_documents_from_disk(file_path:str) -> List[Document]:
     for doc in serializable_docs]
     return documents
 
-# Store documents in file
 def store_documents_on_disk(documents:List[Document], file_path: str) -> None:
     serializable_docs = [
         {
@@ -43,19 +42,21 @@ def store_documents_on_disk(documents:List[Document], file_path: str) -> None:
     with open(file_path, 'w', encoding="utf-8") as f:
         json.dump(serializable_docs, f, ensure_ascii=False)
 
-# Function to save a list of RawIngredientList objects as JSON
+
+# RawIngredients
 def store_raw_ingredient_lists_on_disk(obj_list: List[RawIngredientList], file_path: str):   
     dict_list = [obj.dict() for obj in obj_list]
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(dict_list, f, ensure_ascii=False)  # Save as pretty-printed JSON
 
-# Function to load JSON and populate a list of RawIngredientList objects
 def load_raw_ingredient_lists_from_disk(file_path: str) -> List[RawIngredientList]:    
     with open(file_path, "r", encoding="utf-8") as f:
         data = json.load(f)
     # Convert the list of dictionaries to a list of RawIngredientList objects
     return [RawIngredientList(**item) for item in data]
 
+
+# ComplexIngredients
 def store_complex_ingredient_list_on_disk(obj_list: List[ComplexIngredientList], file_path: str) -> None:
     # Convert the Pydantic model to a dictionary
     dict_list = [obj.dict() for obj in obj_list]    
@@ -70,15 +71,14 @@ def load_complex_ingredient_list_from_disk(file_path: str) -> ComplexIngredientL
     # Convert the dictionary back to a Pydantic model
     return [ComplexIngredientList(**item) for item in data]
 
-# Store text in file
-def write_to_file(text:str, filename:str) -> None:
+# Text
+def write_text_to_file(text:str, filename:str) -> None:
     """Schreibt den Text in eine Textdatei."""
     with open(filename, "w", encoding="utf-8") as f:
         f.write(text)
     print(f"Text wurde in {filename} gespeichert.")
 
-# Read text from file
-def read_from_file(filename:str) -> str:
+def read_text_from_file(filename:str) -> str:
     """Liest den Text aus einer Textdatei und gibt ihn zurück."""
     with open(filename, "r", encoding="utf-8") as file:
         text = file.read()

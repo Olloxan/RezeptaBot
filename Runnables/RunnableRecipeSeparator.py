@@ -5,7 +5,7 @@ from langchain_core.output_parsers import StrOutputParser
 
 from Logger import Logger
 from Runnables import RunnableDebugger as Debugger
-from Utils import read_from_file
+from Utils import read_text_from_file
 
 class RunnableRecipeSeparator(Runnable):
     def __init__(self, llm):
@@ -13,7 +13,7 @@ class RunnableRecipeSeparator(Runnable):
         self.logger = Logger()
         self.debugger = Debugger()
         self.output_parser = StrOutputParser()
-        self.prompt = PromptTemplate.from_template(read_from_file("Recipes/Prompts/RecipeSeparation_prompt.txt"))
+        self.prompt = PromptTemplate.from_template(read_text_from_file("Recipes/Prompts/RecipeSeparation_prompt.txt"))
         
     def invoke(self, state: dict)->list[Document]:
         """expected dict: state['input'] = List[document]"""

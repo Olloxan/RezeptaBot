@@ -1,6 +1,6 @@
 from langchain_community.llms import Ollama
 from langchain_core.prompts import PromptTemplate
-from Utils import store_documents_on_disk, load_documents_from_disk, read_from_file, store_raw_ingredient_lists_on_disk, load_raw_ingredient_lists_from_disk, store_complex_ingredient_list_on_disk
+from Utils import store_documents_on_disk, load_documents_from_disk, read_text_from_file, store_raw_ingredient_lists_on_disk, load_raw_ingredient_lists_from_disk, store_complex_ingredient_list_on_disk
 from Runnables import RunnableRawIngredientExtracor, RunnableRecipeSeparator, RunnableComplexIngredientExtractor
 
 
