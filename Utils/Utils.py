@@ -1,7 +1,6 @@
 ﻿import pickle
 import json
 from langchain.docstore.document import Document
-from typing import List
 
 from BaseModels import RawIngredientList, ComplexIngredientList
 
@@ -21,7 +20,7 @@ def save_object(object_to_store, path):
 
 
 # Documents
-def load_documents_from_disk(file_path:str) -> List[Document]:
+def load_documents_from_disk(file_path:str) -> list[Document]:
     # Read the JSON file
     with open(file_path, 'r', encoding="utf-8") as f:
         serializable_docs = json.load(f)
@@ -31,7 +30,7 @@ def load_documents_from_disk(file_path:str) -> List[Document]:
     for doc in serializable_docs]
     return documents
 
-def store_documents_on_disk(documents:List[Document], file_path: str) -> None:
+def store_documents_on_disk(documents:list[Document], file_path: str) -> None:
     serializable_docs = [
         {
             'page_content': doc.page_content,
@@ -44,12 +43,12 @@ def store_documents_on_disk(documents:List[Document], file_path: str) -> None:
 
 
 # RawIngredients
-def store_raw_ingredient_lists_on_disk(obj_list: List[RawIngredientList], file_path: str):   
+def store_raw_ingredient_lists_on_disk(obj_list: list[RawIngredientList], file_path: str):   
     dict_list = [obj.dict() for obj in obj_list]
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(dict_list, f, ensure_ascii=False)  # Save as pretty-printed JSON
 
-def load_raw_ingredient_lists_from_disk(file_path: str) -> List[RawIngredientList]:    
+def load_raw_ingredient_lists_from_disk(file_path: str) -> list[RawIngredientList]:    
     with open(file_path, "r", encoding="utf-8") as f:
         data = json.load(f)
     # Convert the list of dictionaries to a list of RawIngredientList objects
@@ -57,14 +56,14 @@ def load_raw_ingredient_lists_from_disk(file_path: str) -> List[RawIngredientLis
 
 
 # ComplexIngredients
-def store_complex_ingredient_list_on_disk(obj_list: List[ComplexIngredientList], file_path: str) -> None:
+def store_complex_ingredient_list_on_disk(obj_list: list[ComplexIngredientList], file_path: str) -> None:
     # Convert the Pydantic model to a dictionary
     dict_list = [obj.dict() for obj in obj_list]    
     # Write the dictionary as a JSON object to the file
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(dict_list, f, ensure_ascii=False)
 
-def load_complex_ingredient_list_from_disk(file_path: str) -> ComplexIngredientList:
+def load_complex_ingredient_list_from_disk(file_path: str) -> list[ComplexIngredientList]:
     # Read the JSON file
     with open(file_path, "r", encoding="utf-8") as f:
         data = json.load(f)

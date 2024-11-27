@@ -2,6 +2,8 @@ from langchain_core.runnables import Runnable
 from langchain_core.runnables.passthrough import RunnableAssign
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
+from langchain.docstore.document import Document
+import json
 
 from Runnables import RunnableDebugger as Debugger
 from Logger import Logger
@@ -17,19 +19,20 @@ class RunnableRawIngredientExtracor(Runnable):
         self.debugger = Debugger()
         self.logger = Logger()
            
-    def invoke(self, state: dict)->list[RawIngredientList]:
+    def invoke(self, state: dict)->list[Document]:
         """expected dict: state['input'] = List[document]"""
         
         ingredient_list = []
-        for i, page in enumerate(state['input']):    
+        for i, document in enumerate(state['input']):    
             try:
-                self.logger.LogMessage(f"Extracting raw ingredients: document {i} from {len(state['input'])-1}")     
+                self.logger.LogMessage(f"Extracting raw ingredients: document {i} of {len(state['input'])-1}")     
                         
-                rawingredients = self.extract_ingredients().invoke({'input': page})
-                           
-                ingredient_list.append(rawingredients)
+                rawingredients = self.extract_ingredients().invoke({'input': document})
+                document = Document(page_content=json.dumps(rawingredients.dict(), ensure_ascii=False), metadata=document.metadata)                
+                ingredient_list.append(document)
+                
             except Exception as exc:
-                self.logger.LogException(exc, f"Error processing document {i}. Recipe is: {page.page_content}. Source is: {page.metadata['source']}")
+                self.logger.LogException(exc, f"Error processing document {i}. Recipe is: {document.page_content}. Source is: {document.metadata['source']}")
         return ingredient_list
 
     def extract_ingredients(self)->Runnable:

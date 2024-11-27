@@ -1,12 +1,14 @@
 from langchain_core.runnables import Runnable
 from langchain_core.runnables.passthrough import RunnableAssign
-from Runnables import RunnableDebugger as Debugger
 from langchain.output_parsers import PydanticOutputParser
+from langchain.docstore.document import Document
+import json
 
+from Runnables import RunnableDebugger as Debugger
 from langchain_core.prompts import PromptTemplate
 from Logger import Logger
 from Utils import read_text_from_file
-from BaseModels import ComplexIngredientList
+from BaseModels import ComplexIngredientList, RawIngredientList
 
 class RunnableComplexIngredientExtractor(Runnable):
     def __init__(self, llm):
@@ -18,19 +20,20 @@ class RunnableComplexIngredientExtractor(Runnable):
         self.logger = Logger()
         self.num_extraction_tries = 5
 
-    def invoke(self, state:dict):
-        """ expected dict: state['input'] = List[RawIngredientList] """
+    def invoke(self, state:dict)->list[Document]:
+        """ expected dict: state['input'] = List[Document] """
         
         complex_ingredient_list = []                
-        for i, rawIngredientList in enumerate(state['input']):    
-            self.logger.LogMessage(f"Extracting Complex Ingredients for: {rawIngredientList.recipe_name}. Recipe {i} from {len(state['input'])}")
+        for i, document in enumerate(state['input']):    
+            rawIngredientList = RawIngredientList(**json.loads(document.page_content))
+            self.logger.LogMessage(f"Extracting Complex Ingredients for: {rawIngredientList.recipe_name}. Recipe {i} of {len(state['input'])}")
             success = True
             for j in range(self.num_extraction_tries): # try multiple times to extract the data
                 try:
                     self.logger.LogMessage(f"Try: {j}")
                     success = True
                                                          
-                    parsed_data = self.extract_complex_ingredients().invoke({'input' : rawIngredientList})
+                    complex_ingredients = self.extract_complex_ingredients().invoke({'input' : rawIngredientList})
                     
                     break
                 except Exception as exc:
@@ -39,7 +42,8 @@ class RunnableComplexIngredientExtractor(Runnable):
             if not success:
                 self.logger.LogException(Exception("Failed to extract Complex Ingredients"), f"Processing failed 5 times. Continuing")
                 continue
-            complex_ingredient_list.append(parsed_data)
+            document = Document(page_content=json.dumps(complex_ingredients.dict(), ensure_ascii=False), metadata=document.metadata) 
+            complex_ingredient_list.append(document)
         return complex_ingredient_list
 
     def extract_complex_ingredients(self)->Runnable:

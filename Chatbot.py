@@ -5,14 +5,16 @@ from langchain_core.prompts import PromptTemplate
 from typing import Counter, List, Union, Dict
 from langchain_core.runnables import RunnableLambda, RunnableAssign, RunnableBranch
 from langchain.docstore.document import Document
-
 import pandas as pd
 import concurrent.futures
 import threading
+import json
+
 from Runnables import RunnableComplexIngredientExtractor, RunnableRawIngredientExtracor, RunnableRecipeMapper, RunnableMultiplier
 from VectorStore import VectorStore
 from FileLoader import FileLoader
 from BaseModels import RawIngredientList, ComplexIngredientList
+from Utils import load_documents_from_disk, store_complex_ingredient_list_on_disk
 
 from functools import partial
 from rich.console import Console
@@ -23,17 +25,6 @@ console = Console()
 base_style = Style(color="#76B900", bold=True)
 pprint = partial(console.print, style=base_style)
 
-def PrintTextWithLabel(label="State: "):
-    def print_and_return(x, label=""):
-        print(f"{label}{x}")
-        return x
-    return RunnableLambda(partial(print_and_return, label=label))
-
-def PrintStructureWithLabel(preface="State: "):
-    def print_and_return(x, preface=""):
-        pprint(preface, x)
-        return x
-    return RunnableLambda(partial(print_and_return, preface=preface))
 
 class ChatbotWithHistory:
     def __init__(self, model, vector_store: VectorStore):
@@ -133,37 +124,33 @@ class ChatbotWithHistory:
         mealcount = Counter(output)
         
         # Load all recipes from json with the corresponding source
-        # all_recipes = self.loader.load_documents_from_disk("Recipes/AllRecipes.json")
-        # source = self.vector_store.get_last_selected_source()
-        # filtered_recipes = self.filter_documents_by_source(all_recipes, source)
-        # --> abspeichern zum Testen
+        
+        source = self.vector_store.get_last_selected_source().split("\\")[-1]
+        complex_ingredient_documents = load_documents_from_disk("logs/ComplexIngredients.json")
+        filtered_complex_ingredient_documents = self.filter_documents_by_source(complex_ingredient_documents, source)
+        filtered_complex_ingredients = [json.loads(data.page_content) for data in filtered_complex_ingredient_documents]        
+        complexIngredients = [ComplexIngredientList(**item) for item in filtered_complex_ingredients]
 
-        # prompt = PromptTemplate.from_template(self.loader.read_from_file("RawIngredientExtraction.txt"))
-        # rawIngredientExtracor = RunnableRawIngredientExtracor(RawIngredientList, self.model, prompt)
-
-        # state['input'] = filtered_recipes
-        # raw_ingredients = rawIngredientExtracor.invoke(state)
-        # --> abspeichern zum Testen
-        
-        # extract Complex Ingredients with Receipe Names from every receipe -> llm
-        # prompt = PromptTemplate.from_template(self.loader.read_from_file("IngredientConversion.txt"))
-        # complexIngredientExtracor = RunnableComplexIngredientExtractor(ComplexIngredientList, self.model, prompt)
-        # state['input'] = raw_ingredients
-        
-        complexIngredients = complexIngredientExtracor.invoke(state)        
-        
-        # Result is a list of all ingredients with the corresponding receipe name
+        filtered_complexIngredients = [item for item in complexIngredients if item.recipe_name in mealcount.keys()]
+                       
         
         multiplier = RunnableMultiplier()
-        state['input'] = complexIngredients
+        state['input'] = filtered_complexIngredients
         state['count'] = mealcount
         multiplied = multiplier.invoke(state)
-
+        
+        store_complex_ingredient_list_on_disk(complexIngredients, 'logs/Chatbottest_original.json')
+        store_complex_ingredient_list_on_disk(multiplied, 'logs/Chatbottest_multiplied.json')
+        
         # multiply all ingredients
         # bundle all ingredients and add to list -> list: external, mapping: llm
         
+        countedMeals = '\n'.join(f"{item}: {count}" for item, count in mealcount.items())
         
-        return '\n'.join(f"{item}: {count}" for item, count in mealcount.items())
+        orignal = "\n\n".join(f"{recipe.recipe_name}:\n" + "\n".join(f"{ing.name}: {ing.quantity or ''} {ing.unit or ''} ({ing.weight} g)" for ing in recipe.ingredients) for recipe in complexIngredients)
+        calculated = "\n\n".join(f"{recipe.recipe_name}:\n" + "\n".join(f"{ing.name}: {ing.quantity or ''} {ing.unit or ''} ({ing.weight} g)" for ing in recipe.ingredients) for recipe in multiplied)
+        
+        return "\n".join([countedMeals, "\nOriginalmengen\n" , orignal, "\nMultiplizierte Mengen\n", calculated])
           
     
     def filter_documents_by_source(self, documents:List[Document], filterstr:str)->List[Document]:

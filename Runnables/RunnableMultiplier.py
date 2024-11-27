@@ -1,5 +1,6 @@
 
 from langchain_core.runnables import Runnable
+import copy
 
 from BaseModels import ComplexIngredientList
 
@@ -16,7 +17,8 @@ class RunnableMultiplier(Runnable):
         
         counter = state['count']
         counterItems = counter.keys()
-        complexIngredientLists = [ingredientlist for ingredientlist in state['input'] if ingredientlist.recipe_name in counterItems]
+        
+        complexIngredientLists = [copy.deepcopy(ingredientlist) for ingredientlist in state['input'] if ingredientlist.recipe_name in counterItems]
 
         for complexIngredientList in complexIngredientLists:
             count = counter[complexIngredientList.recipe_name]
