@@ -28,8 +28,8 @@ class RunnableRawIngredientExtracor(Runnable):
                 self.logger.LogMessage(f"Extracting raw ingredients: document {i} of {len(state['input'])-1}")     
                         
                 rawingredients = self.extract_ingredients().invoke({'input': document})
-                document = Document(page_content=json.dumps(rawingredients.dict(), ensure_ascii=False), metadata=document.metadata)                
-                ingredient_list.append(document)
+                doc = Document(page_content=json.dumps(rawingredients.dict(), ensure_ascii=False), metadata=document.metadata)                
+                ingredient_list.append(doc)
                 
             except Exception as exc:
                 self.logger.LogException(exc, f"Error processing document {i}. Recipe is: {document.page_content}. Source is: {document.metadata['source']}")

@@ -42,8 +42,8 @@ class RunnableComplexIngredientExtractor(Runnable):
             if not success:
                 self.logger.LogException(Exception("Failed to extract Complex Ingredients"), f"Processing failed 5 times. Continuing")
                 continue
-            document = Document(page_content=json.dumps(complex_ingredients.dict(), ensure_ascii=False), metadata=document.metadata) 
-            complex_ingredient_list.append(document)
+            doc = Document(page_content=json.dumps(complex_ingredients.dict(), ensure_ascii=False), metadata=document.metadata) 
+            complex_ingredient_list.append(doc)
         return complex_ingredient_list
 
     def extract_complex_ingredients(self)->Runnable:

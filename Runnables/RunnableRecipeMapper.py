@@ -1,6 +1,5 @@
 from langchain_core.runnables import Runnable
 from langchain_core.output_parsers import StrOutputParser 
-from typing import List
 from Logger import Logger
 from Runnables import RunnableDebugger as Debugger
 
@@ -40,16 +39,16 @@ class RunnableRecipeMapper(Runnable):
                         
     def recipe_name_splitter(self, state:dict)->dict: 
         """Converts: Schoko-Smoothie mit Beeren - Ingredients: B -> Schoko-Smoothie mit Beeren"""
-        full_name_list:List[str] = [name.split(" - Ingredients")[0].strip() for name in state['recipe_names_with_ingredients']]
+        full_name_list:list[str] = [name.split(" - Ingredients")[0].strip() for name in state['recipe_names_with_ingredients']]
         full_receipe_names = "; ".join(full_name_list)
         return {'str' : full_receipe_names, 'list' : full_name_list}
     
-    def get_meal_times(self, state:dict)->List[str]:
+    def get_meal_times(self, state:dict)->list[str]:
         mealtimes = state['short_recipe_names'].columns.tolist()
         mealtimes.remove('Tag')
         return mealtimes
 
-    def get_short_recipe_names_by_mealtime(self, state:dict, mealtime:List[str])->dict:
+    def get_short_recipe_names_by_mealtime(self, state:dict, mealtime:list[str])->dict:
         short_recipe_names = [item for item in state['short_recipe_names'][mealtime] if item != ""]
         short_recipe_name_string = "; ".join(short_recipe_names)
         return {'str' : short_recipe_name_string, 'list' : short_recipe_names}
@@ -57,7 +56,7 @@ class RunnableRecipeMapper(Runnable):
     def runchain(self)->Runnable:
         return ( self.prompt | self.debugger.Runnable_PrintTokencout() | self.llm | self.outputparser)
     
-    def clean_string_and_convert_to_list(self, string:str)->List[str]:                 
+    def clean_string_and_convert_to_list(self, string:str)->list[str]:                 
         string = (string
                 .replace("\n", "")
                 .replace(".", "")
@@ -65,7 +64,7 @@ class RunnableRecipeMapper(Runnable):
         output_list = [item.strip() for item in string.split(";")]
         return output_list
     
-    def output_conditions_are_met(self, chain_output_list:List[str], short_name_list:List[str], full_name_list:List[str])->bool:
+    def output_conditions_are_met(self, chain_output_list:list[str], short_name_list:list[str], full_name_list:list[str])->bool:
         """Output conditions: 
             1. is the output list a subset of the full name list
             2. have the output list and the list of short names the same length            
@@ -73,7 +72,7 @@ class RunnableRecipeMapper(Runnable):
         # prettyPrint("chain_output_list", chain_output_list)
         # prettyPrint("short_name_list", short_name_list)
         # prettyPrint("full_name_list", full_name_list)
-        conditions:List[bool] = []
+        conditions:list[bool] = []
         conditions.append(set(chain_output_list).issubset(set(full_name_list)))
         
         # self.logger.LogMessage(f"missing elements: {set(chain_output_list) - set(full_name_list)}")

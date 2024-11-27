@@ -14,30 +14,38 @@ class RunnableRecipeSeparator(Runnable):
         self.debugger = Debugger()
         self.output_parser = StrOutputParser()
         self.prompt = PromptTemplate.from_template(read_text_from_file("Recipes/Prompts/RecipeSeparation_prompt.txt"))
+        self.num_extraction_tries = 5
         
     def invoke(self, state: dict)->list[Document]:
         """expected dict: state['input'] = List[document]"""
                 
         recipes:list[Document] = []
         
-        for i, document in enumerate(state['input']):   
-            try:
-                self.logger.LogMessage(f"Separating: document {i} from {len(state['input'])-1}")
+        for i, document in enumerate(state['input']):               
+            self.logger.LogMessage(f"Separating: document {i} of {len(state['input'])-1}")
             
-                semikolon_separated_recipenames = self.separate_recipe().invoke({"input" : document})
+            for j in range(self.num_extraction_tries):
+                try:    
+                    self.logger.LogMessage(f"Try: {j}")
+                    success = True
+                    
+                    semikolon_separated_recipenames = self.separate_recipe().invoke({"input" : document})
             
-                recipe_names:list[str] = semikolon_separated_recipenames.split(";")
-                recipe_names = [item for item in recipe_names if item != 'leer']            
+                    recipe_names:list[str] = semikolon_separated_recipenames.split(";")
+                    recipe_names = [item for item in recipe_names if item != 'leer']            
                             
-                page_content = document.page_content
-                split_recipes = self.split_recipes_by_name(page_content, recipe_names)
+                    page_content = document.page_content
+                    split_recipes = self.split_recipes_by_name(page_content, recipe_names)                    
+                    break                    
+                except Exception as exc:
+                    self.logger.LogException(exc, f"Error processing document {i}. Recipe names are: {', '.join(recipe_names)}")
+                    success = False
+            if not success:
+                self.logger.LogException(Exception(f"Failed to separate document. Source: {document.metadata['source']}, page: {document.metadata['page']}"), f"Processing failed 5 times. Continuing")
+                continue
 
-                documents = [Document(page_content=recipe, metadata=document.metadata) for recipe in split_recipes if recipe != '']
-                recipes.extend(documents)    
-            except Exception as exc:
-                self.logger.LogException(exc, f"Error processing document {i}. Recipe names are: {', '.join(recipe_names)}")
-                recipes.append(document)
-        
+            documents = [Document(page_content=recipe, metadata=document.metadata) for recipe in split_recipes if recipe != '']
+            recipes.extend(documents)            
         return recipes
 
     def separate_recipe(self)->Runnable:
