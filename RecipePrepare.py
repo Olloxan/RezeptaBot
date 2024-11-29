@@ -5,8 +5,10 @@ from Runnables import RunnableRawIngredientExtracor, RunnableRecipeSeparator, Ru
 
 
 # Prepare Environment
-modelname = "llama3.1:8b-instruct-q4_K_S"
+modelname = "llama3.1:8b-instruct-q8_0"
 llm = Ollama(model = modelname)
+
+
 
 ###### Part 1 #######
 ## load documents from json format
@@ -32,12 +34,12 @@ llm = Ollama(model = modelname)
 
 ###### Part 3 #######
 
-# rawingredients = load_documents_from_disk('logs/RawIngredients.json')
-# state = {'input': rawingredients}
+rawingredients = load_documents_from_disk('logs/RawIngredients.json')
+state = {'input': rawingredients}
 
 
-# complexIngredientExtractor = RunnableComplexIngredientExtractor(llm)
+complexIngredientExtractor = RunnableComplexIngredientExtractor(llm)
 
-# complexIngredients = complexIngredientExtractor.invoke(state)
+complexIngredients = complexIngredientExtractor.invoke(state)
 
-# store_documents_on_disk(complexIngredients, 'logs/ComplexIngredients.json')
+store_documents_on_disk(complexIngredients, 'logs/ComplexIngredients.json')

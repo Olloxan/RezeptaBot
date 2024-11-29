@@ -55,3 +55,7 @@ class RunnableDebugger:
             self.logger.LogMessage(f"Number of tokens: {num_tokens}")
             return x
         return RunnableLambda(partial(print_tokencount_and_return))
+    
+    ### Data specific debuggers
+   
+

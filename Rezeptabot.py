@@ -6,7 +6,7 @@ from Chatbot import ChatbotWithHistory
 
 vector_store = VectorStore()
 
-modelname = "llama3.1:8b-instruct-q4_K_S"
+modelname = "llama3.1:8b-instruct-q8_0"
 model = Ollama(model = modelname)
 chatbot = ChatbotWithHistory(model=model, vector_store=vector_store)
 chatbot.preloadModel()
