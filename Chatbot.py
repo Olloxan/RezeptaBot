@@ -1,30 +1,19 @@
 ﻿
-import stat
 from langchain_core.output_parsers import StrOutputParser 
 from operator import itemgetter
 from langchain_core.prompts import PromptTemplate
 from typing import Counter, List, Union, Dict
-from langchain_core.runnables import RunnableLambda, RunnableAssign, RunnableBranch
+from langchain_core.runnables import RunnableBranch
 from langchain.docstore.document import Document
 import pandas as pd
-import concurrent.futures
-import threading
 import json
 
-from Runnables import RunnableComplexIngredientExtractor, RunnableRawIngredientExtracor, RunnableRecipeMapper, RunnableMultiplier, RunnableShoppingListBuilder
+from Runnables import RunnableRecipeMapper, RunnableMultiplier, RunnableShoppingListBuilder
 from VectorStore import VectorStore
 from FileLoader import FileLoader
-from BaseModels import RawIngredientList, ComplexIngredientList
+from BaseModels import ComplexIngredientList
 from Utils import load_documents_from_disk, store_complex_ingredient_list_on_disk
-
-from functools import partial
-from rich.console import Console
-from rich.style import Style
-from rich.theme import Theme
-
-console = Console()
-base_style = Style(color="#76B900", bold=True)
-pprint = partial(console.print, style=base_style)
+from Logger import Logger
 
 
 class ChatbotWithHistory:
@@ -32,20 +21,13 @@ class ChatbotWithHistory:
         self.model = model
         self.vector_store = vector_store
         self.loader = FileLoader()
-       
-    
+        self.logger = Logger()
+           
     def preloadModel(self):
-        self.startup()
-        
-    def startup(self):
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor.submit(self.load_model)
-        
-    def load_model(self):
-        print("Loading model")
+        self.logger.LogMessage("Preloading chatbot model")
         self.model.invoke("")
-        print("model loaded")
-    
+        self.logger.LogMessage("Model loaded")
+                                  
     def stream(self, state: dict):
         # state['message'] = user message: str
         # state['history'] = history: [[(user) None, (agent) "Hello you!"]] (List of Lists)
@@ -82,7 +64,7 @@ class ChatbotWithHistory:
             | parser
             )
     
-    def build_history(self, history: List[List[Union[None, str]]]) -> str:              
+    def build_history(self, history: list[list[Union[None, str]]]) -> str:              
         prompt = ""
         for messages in history:            
             usermessage, agentmessage = messages
@@ -155,7 +137,7 @@ class ChatbotWithHistory:
         for item in shoppingList_categoryItems:
             returnstring += f"{item.recipe_name}\n" # <--category
             for ingredient in item.ingredients:
-                if(ingredient.quantity != None):
+                if(ingredient.unit != None):
                     returnstring += f" * {ingredient.name} {ingredient.quantity} x {ingredient.unit} ({ingredient.weight}g)\n"
                 else:
                     returnstring += f" * {ingredient.name} {ingredient.weight}g\n"

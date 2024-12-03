@@ -17,17 +17,12 @@ class RunnableShoppingListBuilder(Runnable):
         for recipe in recipe_ingredient_list:          
             ingredients = self.retrieveIngredients(recipe)                       
             self.addRecipesToCategories(ingredients)
-        
-            
+                   
         # optionaler vorverarbeitungsschritt, Zutaten zusammen fassen
 
         self.createShoppingList()
         return self.shopping_list
-    
-    # def fooRunnable(self)->Runnable:
-    #     """ select one of the following categories for the ingredent: Obst/Gemüse, Vegan, Milchprodukte, Tiefkühl, Sonstiges """
-    #     return (prompt | model | strOutputParser)
-
+       
     def retrieveIngredients(self, complexIngredientsList:ComplexIngredientList)->list[Ingredient]:
         return complexIngredientsList.ingredients
     

@@ -31,15 +31,6 @@ def document_retrieve(text_input):
 
                                
 
-    # for token in model.stream(message):        
-    # ## If you're using standard print, keep line from getting too long
-    #     buffer += token
-    #     yield buffer
-
-# test_question = "Tell me about RAG!"  ## <- modify as desired       
-# for response in chat_gen(test_question, return_buffer=False):
-#     print(response, end='')
-
 interface = UserInterface(chat_fn=chat_gen, doc_retrieval_fn=document_retrieve)
 interface.render()
 
