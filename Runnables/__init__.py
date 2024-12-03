@@ -4,3 +4,4 @@ from .RunnableRawIngredientExtracor import RunnableRawIngredientExtracor
 from .RunnableComplexIngredientExtractor import RunnableComplexIngredientExtractor
 from .RunnableMultiplier import RunnableMultiplier
 from .RunnableRecipeSeparator import RunnableRecipeSeparator
+from .RunnableShoppingListBuilder import RunnableShoppingListBuilder

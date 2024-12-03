@@ -59,7 +59,7 @@ class RunnableComplexIngredientExtractor(Runnable):
                 | self.llm
                 | self.clean_and_format_output 
                 | self.output_validator_parser 
-                | self.set_quantity_null)
+                | self.set_quantity_none)
         
     def clean_and_format_output(self, string):
         if '{' not in string: string = '{' + string
@@ -72,7 +72,7 @@ class RunnableComplexIngredientExtractor(Runnable):
         ) 
         return string 
     
-    def set_quantity_null(self, complexIngredientList:ComplexIngredientList)->ComplexIngredientList:
+    def set_quantity_none(self, complexIngredientList:ComplexIngredientList)->ComplexIngredientList:
         for ingredient in complexIngredientList.ingredients:
             if ingredient.unit == None:
                 ingredient.quantity = None

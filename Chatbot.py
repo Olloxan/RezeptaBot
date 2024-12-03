@@ -1,4 +1,5 @@
 ﻿
+import stat
 from langchain_core.output_parsers import StrOutputParser 
 from operator import itemgetter
 from langchain_core.prompts import PromptTemplate
@@ -10,7 +11,7 @@ import concurrent.futures
 import threading
 import json
 
-from Runnables import RunnableComplexIngredientExtractor, RunnableRawIngredientExtracor, RunnableRecipeMapper, RunnableMultiplier
+from Runnables import RunnableComplexIngredientExtractor, RunnableRawIngredientExtracor, RunnableRecipeMapper, RunnableMultiplier, RunnableShoppingListBuilder
 from VectorStore import VectorStore
 from FileLoader import FileLoader
 from BaseModels import RawIngredientList, ComplexIngredientList
@@ -117,18 +118,19 @@ class ChatbotWithHistory:
         state={}
         state['short_recipe_names'] = df_restored
         state['recipe_names_with_ingredients'] = recipes_and_ingredients 
-        output = recipeMapper.invoke(state)
+        List_of_mapped_recipes = recipeMapper.invoke(state)
                         
         # count all recipes -> Dict with receipenames as Key and count as value
-        mealcount = Counter(output)
+        mealcount = Counter(List_of_mapped_recipes)
         
         # Load complexIngredients from disk
         source = self.vector_store.get_last_selected_source().split("\\")[-1]
         complex_ingredient_documents = load_documents_from_disk("logs/ComplexIngredients.json")
+        
+        # Filter complexIngredients by source
         filtered_complex_ingredient_documents = self.filter_documents_by_source(complex_ingredient_documents, source)
-        filtered_complex_ingredients_json = [json.loads(data.page_content) for data in filtered_complex_ingredient_documents]        
+        filtered_complex_ingredients_json = [json.loads(data.page_content) for data in filtered_complex_ingredient_documents]                
         complex_ingredients = [ComplexIngredientList(**item) for item in filtered_complex_ingredients_json]
-
         filtered_complexIngredients = [item for item in complex_ingredients if item.recipe_name in mealcount.keys()]
                        
         
@@ -137,17 +139,28 @@ class ChatbotWithHistory:
         state['count'] = mealcount
         multiplied = multiplier.invoke(state)
         
+        state['input'] = multiplied
+        shopping_list_builder = RunnableShoppingListBuilder()
+        shoppingList_categoryItems = shopping_list_builder.invoke(state)
+
         store_complex_ingredient_list_on_disk(complex_ingredients, 'logs/Chatbottest_original.json')
         store_complex_ingredient_list_on_disk(multiplied, 'logs/Chatbottest_multiplied.json')
+        store_complex_ingredient_list_on_disk(shoppingList_categoryItems, 'logs/Chatbottest_shoppinglist.json')
                 
-        # multiply all ingredients
-        # bundle all ingredients and add to list -> list: external, mapping: llm
+      
         
         countedMeals = '\n'.join(f"{item}: {count}" for item, count in mealcount.items())
-                
-        calculated = "\n\n".join(f"{recipe.recipe_name}:\n" + "\n".join(f"{ing.name}: {ing.quantity or ''} {ing.unit or ''} ({ing.weight} g)" for ing in recipe.ingredients) for recipe in multiplied)
         
-        return "\n".join([countedMeals, "\nMultiplizierte Mengen\n", calculated])
+        returnstring = ""
+        for item in shoppingList_categoryItems:
+            returnstring += f"{item.recipe_name}\n" # <--category
+            for ingredient in item.ingredients:
+                if(ingredient.quantity != None):
+                    returnstring += f" * {ingredient.name} {ingredient.quantity} x {ingredient.unit} ({ingredient.weight}g)\n"
+                else:
+                    returnstring += f" * {ingredient.name} {ingredient.weight}g\n"
+        
+        return "\n".join([countedMeals, "\n\nEinkaufsliste\n", returnstring])
           
     
     def filter_documents_by_source(self, documents:List[Document], filterstr:str)->List[Document]:
