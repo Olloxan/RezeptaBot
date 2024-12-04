@@ -5,3 +5,5 @@ from .RunnableComplexIngredientExtractor import RunnableComplexIngredientExtract
 from .RunnableMultiplier import RunnableMultiplier
 from .RunnableRecipeSeparator import RunnableRecipeSeparator
 from .RunnableShoppingListBuilder import RunnableShoppingListBuilder
+from .RunnableEmbeddingStringBuilder import RunnableEmbeddingStringBuilder
+
