@@ -25,7 +25,7 @@ class RunnableEmbeddingStringBuilder(Runnable):
         ingredient_list = []
         for i, document in enumerate(state['input']):    
             try:
-                self.logger.LogMessage(f"Extracting raw ingredients: document {i} of {len(state['input'])-1}")     
+                self.LogMessage(f"Extracting raw ingredients: document {i} of {len(state['input'])-1}")     
                         
                 embeddingtext = self.extract_ingredients().invoke({'input': document})
                 
@@ -33,7 +33,7 @@ class RunnableEmbeddingStringBuilder(Runnable):
                 ingredient_list.append(doc)
                 
             except Exception as exc:
-                self.logger.LogException(exc, f"Error processing document {i}. Recipe is: {document.page_content}. Source is: {document.metadata['source']}")
+                self.LogException(exc, f"Error processing document {i}. Recipe is: {document.page_content}. Source is: {document.metadata['source']}")
         return ingredient_list
 
     def extract_ingredients(self)->Runnable:
@@ -57,3 +57,9 @@ class RunnableEmbeddingStringBuilder(Runnable):
         text_to_embed = f"{recipe.recipe_name} - Ingredients: {ingredients_str}"
     
         return text_to_embed
+    
+    def LogMessage(self, message:str):
+        self.logger.LogMessage(message, self)
+        
+    def LogException(self, exception:Exception, message:str = "Processing failed"):
+        self.logger.LogException(exception, message, self)

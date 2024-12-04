@@ -22,35 +22,31 @@ class RunnableComplexIngredientExtractor(Runnable):
         self.format_instruction_inserter = RunnableAssign({'format_instructions' : lambda x: self.output_validator_parser.get_format_instructions()})   
         self.debugger = Debugger()
         self.logger = Logger()
-        self.num_extraction_tries = 5
+        self.num_extraction_tries = 2
         self.ingredient_list:list[Ingredient] = []
         self.strOutputParser = StrOutputParser()
 
-    def invoke(self, state:dict)->list[Document]:
-        """ expected dict: state['input'] = List[Document] """
-        
-        complex_ingredient_list = []                
-        for i, document in enumerate(state['input']):    
-            rawIngredientList = RawIngredientList(**json.loads(document.page_content))
-            self.logger.LogMessage(f"Extracting Complex Ingredients for: {rawIngredientList.recipe_name}. Recipe {i} of {len(state['input'])}")
-            success = True
-            for j in range(self.num_extraction_tries): # try multiple times to extract the data
-                try:
-                    self.logger.LogMessage(f"Try: {j}")
-                    success = True
-                                                         
-                    complex_ingredients = (self.extract_complex_ingredients() | self.set_category).invoke({'input' : rawIngredientList}) 
+    def invoke(self, state:dict)->Document:
+        """ expected dict: state['input'] = Document """
+                            
+        rawIngredientList = RawIngredientList(**json.loads(state['input'].page_content))
+        self.LogMessage(f"Extracting Complex Ingredients for: {rawIngredientList.recipe_name}")
+        success = True
+        for i in range(self.num_extraction_tries): # try multiple times to extract the data
+            try:
+                self.LogMessage(f"Try: {i}")
+                success = True                                                         
+                complex_ingredients = (self.extract_complex_ingredients() | self.set_category).invoke({'input' : rawIngredientList}) 
                                        
-                    break
-                except Exception as exc:
-                    self.logger.LogException(exc, f"Error decoding JSON")
-                    success = False
-            if not success:
-                self.logger.LogException(Exception("Failed to extract Complex Ingredients"), f"Processing failed 5 times. Continuing")
-                continue
-            doc = Document(page_content=json.dumps(complex_ingredients.dict(), ensure_ascii=False), metadata=document.metadata) 
-            complex_ingredient_list.append(doc)
-        return complex_ingredient_list
+                break
+            except Exception as exc:
+                self.LogException(exc, f"Error decoding JSON")
+                success = False
+        if not success:
+            raise Exception(f"Failed to extract Complex Ingredients for {rawIngredientList.recipe_name} {self.num_extraction_tries} times")
+                        
+        document = Document(page_content=json.dumps(complex_ingredients.dict(), ensure_ascii=False), metadata=state['input'].metadata)         
+        return document
 
     def extract_complex_ingredients(self)->Runnable:
         return (self.format_instruction_inserter 
@@ -79,17 +75,17 @@ class RunnableComplexIngredientExtractor(Runnable):
         return complexIngredientList
         
     def set_category(self, complexIngredientList:ComplexIngredientList)->ComplexIngredientList:
-        self.logger.LogMessage(f"Setting ingredient categories for {complexIngredientList.recipe_name}")
+        self.LogMessage(f"Setting ingredient categories for {complexIngredientList.recipe_name}")
         for ingredient in complexIngredientList.ingredients:
             # if Item already exists, no call to llm
             if not self.is_ingredient_on_list(ingredient):
                 # llm call mit kathegorie als ausgang
                 ingredient.category = self.select_category().invoke({'input' : ingredient.name})                
-                self.logger.LogMessage(f"Ingredient: {ingredient.name} -> {ingredient.category}")
+                self.LogMessage(f"Ingredient: {ingredient.name} -> {ingredient.category}")
                 self.ingredient_list.append(ingredient)
             else:                
                 ingredient.category = self.get_category(ingredient)
-                self.logger.LogMessage(f"Ingredient on the list: {ingredient.name} -> {ingredient.category}")
+                self.LogMessage(f"Ingredient on the list: {ingredient.name} -> {ingredient.category}")
 
         return complexIngredientList
     
@@ -110,3 +106,9 @@ class RunnableComplexIngredientExtractor(Runnable):
         for item in self.ingredient_list:
             if ingredient.name == item.name:
                 return item.category
+            
+    def LogMessage(self, message:str):
+        self.logger.LogMessage(message, self)
+        
+    def LogException(self, exception:Exception, message:str = "Processing failed"):
+        self.logger.LogException(exception, message, self)

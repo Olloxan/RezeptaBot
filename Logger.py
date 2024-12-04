@@ -36,27 +36,32 @@ class Logger:
         return datetime.now().strftime('%d.%m.%Y %H:%M')
 
     @staticmethod
-    def LogMessage(message: str):
+    def LogMessage(message: str, instance:object = None):
         # Get the current timestamp
+        class_name = instance.__class__.__name__ if instance else "Default"
         timestamp = Logger._get_timestamp()
-        log_message = {"time": timestamp, "Message": message}
+        log_message = {"time": timestamp, "Module": class_name, "Message": message}
         
         # Print the message to console
-        print(f"{timestamp} Message: {message}")
+        print(f"{timestamp} Module: {class_name} Message: {message}")
         
         # Write the message to the log file in JSON format
         with open(Logger._log_file, 'a', encoding="utf-8") as f:
             f.write(json.dumps(log_message, ensure_ascii=False) + ',\n')
 
     @staticmethod
-    def LogException(exception: Exception, message: str = "processing failed"):
+    def LogException(exception: Exception, message: str = "processing failed", instance:object = None):
         # Get the current timestamp
+        class_name = instance.__class__.__name__ if instance else "Default"
         timestamp = Logger._get_timestamp()
-        exception_message = str(exception)
-        log_message = {"time": timestamp, "Message": message, "Exception": exception_message}
+        
+        exception_message = str(exception).encode('latin1').decode('unicode_escape')                
+        utf8_message = exception_message.encode('utf-8').decode('utf-8')
+
+        log_message = {"time": timestamp, "Module": class_name, "Message": message, "Exception": utf8_message}
         
         # Print the error to console
-        print(f"{timestamp} Error: {message}. Exception: {exception_message}")
+        print(f"{timestamp} Module: {class_name} Error: {message}. Exception: {exception_message}")
         
         # Write the error message to the log file in JSON format
         with open(Logger._log_file, 'a', encoding="utf-8") as f:

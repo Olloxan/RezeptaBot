@@ -22,11 +22,11 @@ class RunnableRecipeSeparator(Runnable):
         recipes:list[Document] = []
         
         for i, document in enumerate(state['input']):               
-            self.logger.LogMessage(f"Separating: document {i} of {len(state['input'])-1}")
+            self.LogMessage(f"Separating: document {i} of {len(state['input'])-1}")
             
             for j in range(self.num_extraction_tries):
                 try:    
-                    self.logger.LogMessage(f"Try: {j}")
+                    self.LogMessage(f"Try: {j}")
                     success = True
                     
                     semikolon_separated_recipenames = self.separate_recipe().invoke({"input" : document})
@@ -38,10 +38,10 @@ class RunnableRecipeSeparator(Runnable):
                     split_recipes = self.split_recipes_by_name(page_content, recipe_names)                    
                     break                    
                 except Exception as exc:
-                    self.logger.LogException(exc, f"Error processing document {i}. Recipe names are: {', '.join(recipe_names)}")
+                    self.LogException(exc, f"Error processing document {i}. Recipe names are: {', '.join(recipe_names)}")
                     success = False
             if not success:
-                self.logger.LogException(Exception(f"Failed to separate document. Source: {document.metadata['source']}, page: {document.metadata['page']}"), f"Processing failed 5 times. Continuing")
+                self.LogException(Exception(f"Failed to separate document. Source: {document.metadata['source']}, page: {document.metadata['page']}"), f"Processing failed 5 times. Continuing")
                 continue
 
             documents = [Document(page_content=recipe, metadata=document.metadata) for recipe in split_recipes if recipe != '']
@@ -55,16 +55,18 @@ class RunnableRecipeSeparator(Runnable):
         """Split the page content by the recipe names"""
         content = page_content
         stripped_recipe_names = [name.strip() for name in recipe_names]
-
+        raise Exception("Not implemented")
         recipe_list = []
         if len(stripped_recipe_names)==0:
-            self.logger.LogMessage("No recipe names found")
+            self.LogMessage("No recipe names found")
+            
         elif len(stripped_recipe_names)==1:
-            self.logger.LogMessage(f"found 1 recipe name: {stripped_recipe_names[0]}")
-            recipe = f"{stripped_recipe_names[0]}\n{content.split(stripped_recipe_names[0])[1]}"
+            self.LogMessage(f"found 1 recipe name: {stripped_recipe_names[0]}")
+            recipe = f"{stripped_recipe_names[0]}\nINGREDIENTS{content.split("INGREDIENTS")[1]}"
             recipe_list.append(recipe)            
+        
         else:            
-            self.logger.LogMessage(f"found {len(stripped_recipe_names)} recipe names: {', '.join(stripped_recipe_names)}")
+            self.LogMessage(f"found {len(stripped_recipe_names)} recipe names: {', '.join(stripped_recipe_names)}")
             for name in stripped_recipe_names:
                 temp = content.split(name)
                 content = temp[1]
@@ -72,3 +74,9 @@ class RunnableRecipeSeparator(Runnable):
             recipe_list.extend(recipes)
                             
         return recipe_list
+    
+    def LogMessage(self, message:str):
+        self.logger.LogMessage(message, self)
+        
+    def LogException(self, exception:Exception, message:str = "Processing failed"):
+        self.logger.LogException(exception, message, self)

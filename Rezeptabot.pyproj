@@ -27,6 +27,7 @@
     <Compile Include="FileLoader.py" />
     <Compile Include="Logger.py" />
     <Compile Include="RecipePrepare.py" />
+    <Compile Include="Runnables\RunnableBase.py" />
     <Compile Include="Runnables\RunnableComplexIngredientExtractor.py" />
     <Compile Include="Runnables\RunnableEmbeddingStringBuilder.py" />
     <Compile Include="Runnables\RunnableMultiplier.py" />

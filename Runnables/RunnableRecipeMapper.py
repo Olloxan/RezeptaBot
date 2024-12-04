@@ -22,7 +22,7 @@ class RunnableRecipeMapper(Runnable):
             short_recipe_names_by_mealtime = self.get_short_recipe_names_by_mealtime(state, mealtime)            
             try:
                 for i in range(5):
-                    self.logger.LogMessage(f"running loop with {mealtime} for the {i}th time")
+                    self.LogMessage(f"running loop with {mealtime} for the {i}th time")
                                 
                     chain_output = self.runchain().invoke({"short_recipe_names" : short_recipe_names_by_mealtime['str'], "recipe_names" : recipe_names['str']})
                 
@@ -34,7 +34,7 @@ class RunnableRecipeMapper(Runnable):
                         meals = []
                 meals.extend(chain_output_list)
             except Exception as exc:
-                self.logger.LogMessage(exc)
+                self.LogException(exc)
         return meals
                         
     def recipe_name_splitter(self, state:dict)->dict: 
@@ -83,3 +83,9 @@ class RunnableRecipeMapper(Runnable):
         conditions.append(len(chain_output_list) == len(short_name_list))                            
         return all(conditions)
         # return True
+
+    def LogMessage(self, message:str):
+        self.logger.LogMessage(message, self)
+        
+    def LogException(self, exception:Exception, message:str = "Processing failed"):
+        self.logger.LogException(exception, message, self)

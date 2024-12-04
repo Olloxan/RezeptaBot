@@ -19,21 +19,14 @@ class RunnableRawIngredientExtracor(Runnable):
         self.debugger = Debugger()
         self.logger = Logger()
            
-    def invoke(self, state: dict)->list[Document]:
-        """expected dict: state['input'] = List[document]"""
+    def invoke(self, state: dict)->Document:
+        """expected dict: state['input'] = Document"""
+                                
+        self.LogMessage(f"Extracting raw ingredients")                             
         
-        ingredient_list = []
-        for i, document in enumerate(state['input']):    
-            try:
-                self.logger.LogMessage(f"Extracting raw ingredients: document {i} of {len(state['input'])-1}")     
-                        
-                rawingredients = self.extract_ingredients().invoke({'input': document})
-                doc = Document(page_content=json.dumps(rawingredients.dict(), ensure_ascii=False), metadata=document.metadata)                
-                ingredient_list.append(doc)
-                
-            except Exception as exc:
-                self.logger.LogException(exc, f"Error processing document {i}. Recipe is: {document.page_content}. Source is: {document.metadata['source']}")
-        return ingredient_list
+        rawingredients = self.extract_ingredients().invoke(state)
+        document = Document(page_content=json.dumps(rawingredients.dict(), ensure_ascii=False), metadata=state['input'].metadata)                                                            
+        return document
 
     def extract_ingredients(self)->Runnable:
         return (self.format_instruction_inserter | self.extraction_prompt | self.debugger.Runnable_PrintTokencout() | self.llm | self.clean_and_format_output | self.output_validator_parser)
@@ -48,3 +41,7 @@ class RunnableRawIngredientExtracor(Runnable):
             .replace("\[", "[")
         ) 
         return string 
+
+    def LogMessage(self, message:str):
+        self.logger.LogMessage(message, self)
+            
