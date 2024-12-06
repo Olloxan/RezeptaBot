@@ -19,17 +19,20 @@ class RunnableRawIngredientExtracor(Runnable):
         self.debugger = Debugger()
         self.logger = Logger()
            
-    def invoke(self, state: dict)->Document:
+    def invoke(self, state: dict, config=None)->Document:
         """expected dict: state['input'] = Document"""
                                 
         self.LogMessage(f"Extracting raw ingredients")                             
-        
-        rawingredients = self.extract_ingredients().invoke(state)
+        try:
+            rawingredients = self.extract_ingredients().invoke(state)
+        except Exception as exc:
+            self.LogException(exc, f"Error extracting raw ingredients")
+            raise Exception(f"Failed to extract raw ingredients")
         document = Document(page_content=json.dumps(rawingredients.dict(), ensure_ascii=False), metadata=state['input'].metadata)                                                            
         return document
 
     def extract_ingredients(self)->Runnable:
-        return (self.format_instruction_inserter | self.extraction_prompt | self.debugger.Runnable_PrintTokencout() | self.llm | self.clean_and_format_output | self.output_validator_parser)
+        return (self.format_instruction_inserter | self.extraction_prompt | self.debugger.Runnable_PrintTokencout(module=self) | self.llm | self.clean_and_format_output | self.output_validator_parser)
         
     def clean_and_format_output(self, string:str)->str:
         if '{' not in string: string = '{' + string
@@ -44,4 +47,7 @@ class RunnableRawIngredientExtracor(Runnable):
 
     def LogMessage(self, message:str):
         self.logger.LogMessage(message, self)
+        
+    def LogException(self, exception:Exception, message:str = "Processing failed"):
+        self.logger.LogException(exception, message, self)
             

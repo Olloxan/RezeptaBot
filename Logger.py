@@ -46,23 +46,31 @@ class Logger:
         print(f"{timestamp} Module: {class_name} Message: {message}")
         
         # Write the message to the log file in JSON format
-        with open(Logger._log_file, 'a', encoding="utf-8") as f:
-            f.write(json.dumps(log_message, ensure_ascii=False) + ',\n')
+        Logger._write_Logmessage_to_file(log_message)
+        
 
     @staticmethod
     def LogException(exception: Exception, message: str = "processing failed", instance:object = None):
         # Get the current timestamp
         class_name = instance.__class__.__name__ if instance else "Default"
         timestamp = Logger._get_timestamp()
+        try:
+            exception_message = str(exception).encode('latin1').decode('unicode_escape')                                
+            utf8_message = exception_message.encode('utf-8').decode('utf-8')
+        except Exception as exc:
+            Logger._write_Logmessage_to_file({"time": timestamp, "Module": "Logger", "Error": "Logging exception failed", "Exception": exc})
+            exception_message = str(exception)
         
-        exception_message = str(exception).encode('latin1').decode('unicode_escape')                
-        utf8_message = exception_message.encode('utf-8').decode('utf-8')
-
-        log_message = {"time": timestamp, "Module": class_name, "Message": message, "Exception": utf8_message}
+        log_message = {"time": timestamp, "Module": class_name, "Error": message, "Exception": utf8_message}
         
         # Print the error to console
         print(f"{timestamp} Module: {class_name} Error: {message}. Exception: {exception_message}")
         
         # Write the error message to the log file in JSON format
+        Logger._write_Logmessage_to_file(log_message)
+        
+
+    @staticmethod
+    def _write_Logmessage_to_file(log_message):
         with open(Logger._log_file, 'a', encoding="utf-8") as f:
             f.write(json.dumps(log_message, ensure_ascii=False) + ',\n')

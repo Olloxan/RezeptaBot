@@ -1,4 +1,6 @@
-﻿from langchain_core.runnables import Runnable
+﻿from os import name
+from turtle import update
+from langchain_core.runnables import Runnable
 from langchain_core.runnables.passthrough import RunnableAssign
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.output_parsers import StrOutputParser
@@ -26,21 +28,22 @@ class RunnableComplexIngredientExtractor(Runnable):
         self.ingredient_list:list[Ingredient] = []
         self.strOutputParser = StrOutputParser()
 
-    def invoke(self, state:dict)->Document:
-        """ expected dict: state['input'] = Document """
-                            
+    def invoke(self, state:dict, config=None)->Document:
+        """ expected dict: state['input'] = Document """                            
         rawIngredientList = RawIngredientList(**json.loads(state['input'].page_content))
+        
         self.LogMessage(f"Extracting Complex Ingredients for: {rawIngredientList.recipe_name}")
+        
         success = True
         for i in range(self.num_extraction_tries): # try multiple times to extract the data
             try:
                 self.LogMessage(f"Try: {i}")
+                
                 success = True                                                         
-                complex_ingredients = (self.extract_complex_ingredients() | self.set_category).invoke({'input' : rawIngredientList}) 
-                                       
+                complex_ingredients = (self.extract_complex_ingredients() | self.set_category).invoke({'input' : rawIngredientList})                                        
                 break
             except Exception as exc:
-                self.LogException(exc, f"Error decoding JSON")
+                self.LogException(exc, f"Error decoding JSON for {rawIngredientList.recipe_name}.")
                 success = False
         if not success:
             raise Exception(f"Failed to extract Complex Ingredients for {rawIngredientList.recipe_name} {self.num_extraction_tries} times")
@@ -51,7 +54,7 @@ class RunnableComplexIngredientExtractor(Runnable):
     def extract_complex_ingredients(self)->Runnable:
         return (self.format_instruction_inserter 
                 | self.extraction_prompt 
-                | self.debugger.Runnable_PrintTokencout() 
+                | self.debugger.Runnable_PrintTokencout(module=self) 
                 | self.llm
                 | self.clean_and_format_output 
                 | self.output_validator_parser 
@@ -82,7 +85,8 @@ class RunnableComplexIngredientExtractor(Runnable):
                 # llm call mit kathegorie als ausgang
                 ingredient.category = self.select_category().invoke({'input' : ingredient.name})                
                 self.LogMessage(f"Ingredient: {ingredient.name} -> {ingredient.category}")
-                self.ingredient_list.append(ingredient)
+                item = ingredient.model_copy(update={'name' : ingredient.name.lower()})                
+                self.ingredient_list.append(item)
             else:                
                 ingredient.category = self.get_category(ingredient)
                 self.LogMessage(f"Ingredient on the list: {ingredient.name} -> {ingredient.category}")
@@ -92,7 +96,7 @@ class RunnableComplexIngredientExtractor(Runnable):
     def is_ingredient_on_list(self, ingredient):
         is_on_list = False
         for item in self.ingredient_list:
-            if ingredient.name == item.name:
+            if ingredient.name.lower() == item.name:
                 ingredient.category = item.category            
                 is_on_list = True
                 break
@@ -100,15 +104,27 @@ class RunnableComplexIngredientExtractor(Runnable):
     
     def select_category(self)->Runnable:
         """ select one of the following categories for the ingredent: Obst/Gemüse, Vegan, Milchprodukte, Tiefkühl, Sonstiges """
-        return (self.category_prompt | self.debugger.Runnable_PrintTokencout() | self.llm | self.strOutputParser)
+        return (self.category_prompt | self.debugger.Runnable_PrintTokencout(module=self) | self.llm | self.strOutputParser)
     
     def get_category(self, ingredient):
         for item in self.ingredient_list:
-            if ingredient.name == item.name:
+            if ingredient.name.lower() == item.name:
                 return item.category
-            
+    
+    def get_IngredientList(self)->list[Document]:
+        docs = []
+        for ingredient in self.ingredient_list:
+            docs.append(Document(page_content=json.dumps(ingredient.dict(), ensure_ascii=False), metadata= {'category':ingredient.category}))
+        return docs
+    
+    def set_IngredientList(self, ingredients:list[Document])->None:        
+        for ingredient in ingredients:
+            self.ingredient_list.append(Ingredient(**json.loads(ingredient.page_content)))                
+
     def LogMessage(self, message:str):
         self.logger.LogMessage(message, self)
         
     def LogException(self, exception:Exception, message:str = "Processing failed"):
         self.logger.LogException(exception, message, self)
+        
+    

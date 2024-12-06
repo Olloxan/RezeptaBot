@@ -74,12 +74,10 @@ def load_complex_ingredient_list_from_disk(file_path: str) -> list[ComplexIngred
 def write_text_to_file(text:str, filename:str) -> None:
     """Schreibt den Text in eine Textdatei."""
     with open(filename, "w", encoding="utf-8") as f:
-        f.write(text)
-    print(f"Text wurde in {filename} gespeichert.")
+        f.write(text)    
 
 def read_text_from_file(filename:str) -> str:
     """Liest den Text aus einer Textdatei und gibt ihn zurück."""
     with open(filename, "r", encoding="utf-8") as file:
-        text = file.read()
-    print(f"Text aus {filename} geladen.")
+        text = file.read()    
     return text

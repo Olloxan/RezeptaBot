@@ -48,13 +48,16 @@ class RunnableDebugger:
             return x
         return RunnableLambda(partial(print_and_return, label=label))
 
-    def Runnable_PrintTokencout(self):
-        def print_tokencount_and_return(x):
+    def Runnable_PrintTokencout(self, module=None):
+        def print_tokencount_and_return(x, module=None):
             tokens = self._tokenizer.tokenize(x.to_string())
             num_tokens = len(tokens)
-            self.logger.LogMessage(f"Number of tokens: {num_tokens}")
+            if module is not None:
+                self.logger.LogMessage(f"Number of tokens: {num_tokens}", instance=module)
+            else:
+                self.logger.LogMessage(f"Number of tokens: {num_tokens}")
             return x
-        return RunnableLambda(partial(print_tokencount_and_return))
+        return RunnableLambda(partial(print_tokencount_and_return, module=module))
     
     ### Data specific debuggers
    

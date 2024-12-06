@@ -16,7 +16,7 @@ class RunnableRecipeSeparator(Runnable):
         self.prompt = PromptTemplate.from_template(read_text_from_file("Recipes/Prompts/RecipeSeparation_prompt.txt"))
         self.num_extraction_tries = 5
         
-    def invoke(self, state: dict)->list[Document]:
+    def invoke(self, state: dict, config=None)->list[Document]:
         """expected dict: state['input'] = List[document]"""
                 
         recipes:list[Document] = []
@@ -49,24 +49,23 @@ class RunnableRecipeSeparator(Runnable):
         return recipes
 
     def separate_recipe(self)->Runnable:
-        return (self.prompt | self.debugger.Runnable_PrintTokencout() | self.llm | self.output_parser)
+        return (self.prompt | self.debugger.Runnable_PrintTokencout(module=self) | self.llm | self.output_parser)
     
     def split_recipes_by_name(self, page_content:str, recipe_names:list[str])->list[str]:
         """Split the page content by the recipe names"""
-        content = page_content
+        content:str = page_content.replace("\n"," ").replace("- ","-")
         stripped_recipe_names = [name.strip() for name in recipe_names]
-        raise Exception("Not implemented")
+        
         recipe_list = []
         if len(stripped_recipe_names)==0:
             self.LogMessage("No recipe names found")
             
         elif len(stripped_recipe_names)==1:
             self.LogMessage(f"found 1 recipe name: {stripped_recipe_names[0]}")
-            recipe = f"{stripped_recipe_names[0]}\nINGREDIENTS{content.split("INGREDIENTS")[1]}"
-            recipe_list.append(recipe)            
-        
+            recipe = f"{stripped_recipe_names[0]}\n{content.split(stripped_recipe_names[0])[1]}"
+            recipe_list.append(recipe)                    
         else:            
-            self.LogMessage(f"found {len(stripped_recipe_names)} recipe names: {', '.join(stripped_recipe_names)}")
+            self.LogMessage(f"found {len(stripped_recipe_names)} recipe names: {', '.join(stripped_recipe_names)}")            
             for name in stripped_recipe_names:
                 temp = content.split(name)
                 content = temp[1]
