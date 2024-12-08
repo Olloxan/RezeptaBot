@@ -56,10 +56,10 @@ class Logger:
         timestamp = Logger._get_timestamp()
         try:
             exception_message = str(exception).encode('latin1').decode('unicode_escape')                                
-            utf8_message = exception_message.encode('utf-8').decode('utf-8')
-        except Exception as exc:
-            Logger._write_Logmessage_to_file({"time": timestamp, "Module": "Logger", "Error": "Logging exception failed", "Exception": exc})
+            utf8_message = exception_message.encode('utf-8').decode('utf-8')            
+        except Exception as exc:            
             exception_message = str(exception)
+            Logger._write_Logmessage_to_file({"time": timestamp, "Module": "Logger", "Error": f"Encoding error of exception: >>{exception_message}<< failed", "Exception": str(exc)})
         
         log_message = {"time": timestamp, "Module": class_name, "Error": message, "Exception": utf8_message}
         

@@ -35,50 +35,50 @@ llm = Ollama(model = modelname)
 #############################################
 #   Part 3: Complex Ingredient Extraction   #
 #############################################
-pages = load_documents_from_disk("Recipes/Json/AllRecipes_separated.json")
-ingredients = load_documents_from_disk("Recipes/Json/IngredientList.json")
+# pages = load_documents_from_disk("Recipes/Json/AllRecipes_separated.json")
+# ingredients = load_documents_from_disk("Recipes/Json/IngredientList.json")
  
-rawIngredientExtracor = RunnableRawIngredientExtracor(llm)
-# rawIngredientExtracor = RunnableAssign({'input':RunnableRawIngredientExtracor(llm)})
-complexIngredientExtractor = RunnableComplexIngredientExtractor(llm)
-complexIngredientExtractor.set_IngredientList(ingredients)
+# rawIngredientExtracor = RunnableRawIngredientExtracor(llm)
+# # rawIngredientExtracor = RunnableAssign({'input':RunnableRawIngredientExtracor(llm)})
+# complexIngredientExtractor = RunnableComplexIngredientExtractor(llm)
+# complexIngredientExtractor.set_IngredientList(ingredients)
 
-state={}
-complexIngredients = []
+# state={}
+# complexIngredients = []
 
-for i, document in enumerate(pages):
-    success = True
-    for j in range(5):        
-        try:
-            logger.LogMessage(f"Processing document {i} of {len(pages) - 1}")
-            state['input'] = document
-            # complexIngredient = (rawIngredientExtracor | complexIngredientExtractor).invoke(state)            
-            state['input'] = rawIngredientExtracor.invoke(state)            
-            complexIngredient = complexIngredientExtractor.invoke(state)            
-            success = True
-            break
-        except Exception as exc:
-            logger.LogException(exc, f"Error processing document {i}. Source is: {document.metadata['source']}, page: {document.metadata['page']}")            
-            success = False
+# for i, document in enumerate(pages):
+#     success = True
+#     for j in range(5):        
+#         try:
+#             logger.LogMessage(f"Processing document {i} of {len(pages) - 1}")
+#             state['input'] = document
+#             # complexIngredient = (rawIngredientExtracor | complexIngredientExtractor).invoke(state)            
+#             state['input'] = rawIngredientExtracor.invoke(state)            
+#             complexIngredient = complexIngredientExtractor.invoke(state)            
+#             success = True
+#             break
+#         except Exception as exc:
+#             logger.LogException(exc, f"Error processing document {i}. Source is: {document.metadata['source']}, page: {document.metadata['page']}")            
+#             success = False
             
-    if success == False:
-        logger.LogException(Exception(f"Failed to separate document. Source: {document.metadata['source']}, page: {document.metadata['page']}"), f"Processing failed 5 times. Continuing")
-        store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), 'logs/Ingredients.json') # --> Zwischenschritt
-    complexIngredients.append(complexIngredient)
+#     if success == False:
+#         logger.LogException(Exception(f"Failed to separate document. Source: {document.metadata['source']}, page: {document.metadata['page']}"), f"Processing failed 5 times. Continuing")
+#         store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), 'logs/Ingredients.json') # --> Zwischenschritt
+#     complexIngredients.append(complexIngredient)
     
-    if i % 50 == 0:
-        logger.LogMessage(f"Storing documents on disk. Document {i} of {len(pages) - 1}")
-        store_documents_on_disk(complexIngredients, f"logs/ComplexIngredients_{i}.json") # --> Zwischenschritt
-        store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), f"logs/Ingredients_{i}.json") # --> Zwischenschritt
+#     if i % 50 == 0:
+#         logger.LogMessage(f"Storing documents on disk. Document {i} of {len(pages) - 1}")
+#         store_documents_on_disk(complexIngredients, f"logs/ComplexIngredients_{i}.json") # --> Zwischenschritt
+#         store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), f"logs/Ingredients_{i}.json") # --> Zwischenschritt
     
-store_documents_on_disk(complexIngredients, 'logs/ComplexIngredients.json') # --> Zwischenschritt
-store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), 'logs/Ingredients.json') # --> Zwischenschritt
+# store_documents_on_disk(complexIngredients, 'logs/ComplexIngredients.json') # --> Zwischenschritt
+# store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), 'logs/Ingredients.json') # --> Zwischenschritt
 
 
 #########################################################
 #   Part 4: Embedding String Generation & Embedding     #
 #########################################################
-pages = load_documents_from_disk("logs/Separated.json")
+pages = load_documents_from_disk("Recipes/Json/AllRecipes_separated.json")
 state = {'input': pages}
 
 
@@ -93,7 +93,9 @@ embeddings = OllamaEmbeddings(model=embedding_modelname)
 # Define the path where you want to store the ChromaDB database
 db_path = 'logs/Chroma'
 
-logger.LogMessage(f"Storing embeddings in Chromadb at {db_path}")
+logger.LogMessage(f"Chroma path {db_path}")
+logger.LogMessage(f"Start generating embedding strings for {len(pages)} documents.")
+
 
 # Use Chroma as the vector store
 vector_store = Chroma.from_documents(
@@ -102,3 +104,5 @@ vector_store = Chroma.from_documents(
     persist_directory=db_path, 
     collection_name='recipe_embeddings'
 )
+
+logger.LogMessage(f"Embedding strings generated and stored in ChromaDB at {db_path}")
