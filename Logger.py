@@ -33,7 +33,15 @@ class Logger:
 
     @staticmethod
     def _get_timestamp():
-        return datetime.now().strftime('%d.%m.%Y %H:%M')
+        """ %d : Day of the month (zero-padded)
+            %m : Month (zero-padded)
+            %Y : Year (4 digits)
+            %H : Hour (24-hour format, zero-padded)
+            %M : Minutes (zero-padded)
+            %S : Seconds (zero-padded)
+            %f : Microseconds (6 digits, zero-padded)
+            """
+        return datetime.now().strftime('%d.%m.%Y %H:%M:%S.%f')[:-3]
 
     @staticmethod
     def LogMessage(message: str, instance:object = None):

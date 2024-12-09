@@ -4,7 +4,7 @@ from VectorStore import VectorStore
 from Chatbot import ChatbotWithHistory
 
 
-vector_store = VectorStore()
+vector_store = VectorStore(collection_name='recipe_embeddings')
 
 modelname = "llama3.1:8b-instruct-q8_0"
 model = Ollama(model = modelname)

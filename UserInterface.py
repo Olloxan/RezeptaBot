@@ -31,12 +31,19 @@ class UserInterface:
                     with gr.Column(scale=1):
                         gr.Markdown("### Week Plan")
                         
+                        # initial_data = pd.DataFrame({
+                        # "Tag": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag", "Montag"],
+                        # "Morgens": ["Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie"],  
+                        # "Mittags": ["Pasta vegane Wurst", "Pasta vegane Wurst", "Pasta vegane Wurst", "Auflauf", "Auflauf", "Auflauf", "Auflauf", "Curry"],
+                        # "Abends": ["Avocado toast", "Avocado toast", "Avocado toast", "Avocado toast", "Curry", "Curry", "Curry", ""],
+                        # "Nachmittags": ["Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", ""]
+                        # })
                         initial_data = pd.DataFrame({
                         "Tag": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag", "Montag"],
-                        "Morgens": ["Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie"],  
-                        "Mittags": ["Pasta vegane Wurst", "Pasta vegane Wurst", "Pasta vegane Wurst", "Auflauf", "Auflauf", "Auflauf", "Auflauf", "Curry"],
-                        "Abends": ["Avocado toast", "Avocado toast", "Avocado toast", "Avocado toast", "Curry", "Curry", "Curry", ""],
-                        "Nachmittags": ["Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", ""]
+                        "Morgens": ["Pudding Oats", "Pudding Oats", "Pudding Oats", "Gebratene Haferflocken", "Gebratene Haferflocken", "Waffeln mit Sojajoghurt", "Waffeln mit Sojajoghurt", "Gebratene Haferflocken",],  
+                        "Mittags": ["", "Saitan Braten", "Saitan Braten", "Saitan Braten", "Feta Pasta", "Quinoa Bowl", "", "",],
+                        "Abends": ["Brokkoli Nudeln", "Brokkoli Nudeln", "", "Feta Pasta", "Feta Pasta", "Quinoa Bowl", "", "",],
+                        "Nachmittags": ["Brombeer-Smoothie", "Brombeer-Smoothie", "Brombeer-Smoothie", "Brombeer-Smoothie", "Brombeer-Smoothie", "Brombeer-Smoothie", "Brombeer-Smoothie", "",]
                         })
                         
                         self.data_frame_weekplan = gr.DataFrame(value=initial_data, headers=["Tag", "Morgens", "Mittags", "Abends", "Nachmittags"], label="Editable Table", interactive=True, show_label=False)
@@ -61,7 +68,7 @@ class UserInterface:
                             label="Enter text for document chain",
                             placeholder="Type your input here...",
                             show_label=False,
-                            value="Schoko-Smoothie mit Beeren"
+                            value="pudding oats"
                         )
                         self.submit_btn_retrieve = gr.Button("Retrieve Recipes")
                         
@@ -76,7 +83,7 @@ class UserInterface:
                             label="Enter text for document chain",
                             placeholder="Type your input here...",
                             show_label=False,
-                            value="0"
+                            value="2"
                         )
                         self.submit_btn_receipe_select = gr.Button("Retrieve Recipes")
                 

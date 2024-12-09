@@ -1,5 +1,6 @@
 from langchain_core.runnables import Runnable
 from langchain_core.output_parsers import StrOutputParser 
+from typing import Counter
 from Logger import Logger
 from Runnables import RunnableDebugger as Debugger
 
@@ -10,29 +11,33 @@ class RunnableRecipeMapper(Runnable):
         self.outputparser = StrOutputParser()      
         self.logger = Logger()
         self.debugger = Debugger()
+        self.num_tries = 5
     
-    def invoke(self, state: dict)->list[str]:
+    def invoke(self, state: dict)->dict[str, Counter]:
         """ state['short_recipe_names'] = pd.DataFrame
             state['recipe_names_with_ingredients'] = full_recipe_names (with ingredients)
         """
         recipe_names = self.recipe_name_splitter(state)        
         mealtimes = self.get_meal_times(state)
-        meals = []
+        meals = {}
         for mealtime in mealtimes:            
             short_recipe_names_by_mealtime = self.get_short_recipe_names_by_mealtime(state, mealtime)            
             try:
-                for i in range(5):
-                    self.LogMessage(f"running loop with {mealtime} for the {i}th time")
+                success = False
+                for i in range(self.num_tries):
+                    
+                    self.LogMessage(f"Try {i} for {mealtime} ")
                                 
                     chain_output = self.runchain().invoke({"short_recipe_names" : short_recipe_names_by_mealtime['str'], "recipe_names" : recipe_names['str']})
                 
                     chain_output_list = self.clean_string_and_convert_to_list(chain_output)
                     if self.output_conditions_are_met(chain_output_list, short_recipe_names_by_mealtime['list'], recipe_names['list']):                
+                        success = True
                         break
-                    if i == 4:
-                        raise Exception("Recipe Mapping faild. Retry...")
-                        meals = []
-                meals.extend(chain_output_list)
+                                            
+                if not success:        
+                    raise Exception("Recipe Mapping faild. Retry...")
+                meals[mealtime] = Counter(chain_output_list)
             except Exception as exc:
                 self.LogException(exc)
         return meals
@@ -54,7 +59,7 @@ class RunnableRecipeMapper(Runnable):
         return {'str' : short_recipe_name_string, 'list' : short_recipe_names}
     
     def runchain(self)->Runnable:
-        return ( self.prompt | self.debugger.Runnable_PrintTokencout() | self.llm | self.outputparser)
+        return ( self.prompt | self.debugger.Runnable_PrintTokencout(module=self) | self.llm | self.outputparser)
     
     def clean_string_and_convert_to_list(self, string:str)->list[str]:                 
         string = (string

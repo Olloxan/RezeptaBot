@@ -12,18 +12,20 @@ class RunnableMultiplier(Runnable):
         """
         expected dict: 
         state['input'] = List[ComplexIngredientList]
-        state['count'] = Counter
+        state['count'] = dict[str,Counter]
         """
         
-        counter = state['count']
-        counterItems = counter.keys()
+        counter_dict = state['count']
+                
+        complexIngredientLists = []
+        for key in counter_dict:
+            complexIngredientList_by_mealtime = [copy.deepcopy(ingredientlist) for ingredientlist in state['input'] if ingredientlist.recipe_name in counter_dict[key]]
         
-        complexIngredientLists = [copy.deepcopy(ingredientlist) for ingredientlist in state['input'] if ingredientlist.recipe_name in counterItems]
-
-        for complexIngredientList in complexIngredientLists:
-            count = counter[complexIngredientList.recipe_name]
-            for ingredient in complexIngredientList.ingredients:
-                ingredient.quantity = ingredient.quantity * count if ingredient.quantity is not None else 0
-                ingredient.weight = ingredient.weight * count if ingredient.weight is not None else 0
-
+            for complexIngredientList in complexIngredientList_by_mealtime:
+                count = counter_dict[key][complexIngredientList.recipe_name]
+                if key in ['Morgens', 'Nachmittags']: count *= 1.5
+                for ingredient in complexIngredientList.ingredients:
+                    ingredient.quantity = ingredient.quantity * count if ingredient.quantity is not None else 0
+                    ingredient.weight = ingredient.weight * count if ingredient.weight is not None else 0
+                complexIngredientLists.append(complexIngredientList)
         return complexIngredientLists

@@ -94,7 +94,7 @@ embeddings = OllamaEmbeddings(model=embedding_modelname)
 db_path = 'logs/Chroma'
 
 logger.LogMessage(f"Chroma path {db_path}")
-logger.LogMessage(f"Start generating embedding strings for {len(pages)} documents.")
+logger.LogMessage(f"Start generating embeddings for {len(pages)} documents.")
 
 
 # Use Chroma as the vector store
@@ -105,4 +105,4 @@ vector_store = Chroma.from_documents(
     collection_name='recipe_embeddings'
 )
 
-logger.LogMessage(f"Embedding strings generated and stored in ChromaDB at {db_path}")
+logger.LogMessage(f"Embeddings generated and stored in ChromaDB at {db_path}")
