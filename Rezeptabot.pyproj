@@ -24,7 +24,7 @@
   <ItemGroup>
     <Compile Include="BaseModels.py" />
     <Compile Include="Chatbot.py" />
-    <Compile Include="FileLoader.py" />
+    <Compile Include="Utils\FileLoader.py" />
     <Compile Include="Logger.py" />
     <Compile Include="RecipePrepare.py" />
     <Compile Include="Runnables\RunnableBase.py" />

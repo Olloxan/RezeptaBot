@@ -121,7 +121,7 @@ class UserInterface:
         """Return the DataFrame (Pandas Dataframe)."""        
         # soll an das Netzwerk gesendet werden, um die Einkaufsliste zu erstellen
         
-        store_object_on_disk(dataframe, "logs/temp/weekplan.json")
+        self.fileloader.store_object_on_disk(dataframe, "logs/temp/weekplan.json")
 
         json_data = dataframe.to_json(orient="split")
         message = f"shoppinglist:{json_data}"

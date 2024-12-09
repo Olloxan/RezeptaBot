@@ -4,11 +4,13 @@ from langchain_core.prompts import PromptTemplate
 from typing import Counter
 from Logger import Logger
 from Runnables import RunnableDebugger as Debugger
+from Utils import FileLoader
 
 class RunnableRecipeMapper(Runnable):
     def __init__(self, llm):
         self.llm = llm
-        self.prompt = PromptTemplate.from_template(self.loader.read_from_file("ReceipeNameMapping_prompt.txt"))
+        loader = FileLoader()
+        self.prompt = PromptTemplate.from_template(loader.read_text_from_file("Recipes/Prompts/ReceipeNameMapping_prompt.txt"))
         self.outputparser = StrOutputParser()      
         self.logger = Logger()
         self.debugger = Debugger()

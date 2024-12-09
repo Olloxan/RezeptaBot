@@ -1,4 +1,4 @@
-import pickle
+﻿import pickle
 import json
 from langchain.docstore.document import Document
 
@@ -91,7 +91,7 @@ class FileLoader():
         self.LogMessage(f"Text saved to {filename}")
 
     def read_text_from_file(self, filename:str) -> str:
-        """Liest den Text aus einer Textdatei und gibt ihn zur�ck."""
+        """Liest den Text aus einer Textdatei und gibt ihn zurück."""
         with open(filename, "r", encoding="utf-8") as file:
             text = file.read()    
         self.LogMessage(f"{filename} loaded from disk")
