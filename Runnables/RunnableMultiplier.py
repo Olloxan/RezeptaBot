@@ -3,10 +3,12 @@ from langchain_core.runnables import Runnable
 import copy
 
 from BaseModels import ComplexIngredientList
+from Logger import Logger
 
 class RunnableMultiplier(Runnable):
     def __init__(self):
-        pass
+        self.logger = Logger()
+        
 
     def invoke(self, state: dict)->list[ComplexIngredientList]:
         """
@@ -15,17 +17,24 @@ class RunnableMultiplier(Runnable):
         state['count'] = dict[str,Counter]
         """
         
-        counter_dict = state['count']
-                
+        counter_dict = state['count']                
         complexIngredientLists = []
         for key in counter_dict:
+            
             complexIngredientList_by_mealtime = [copy.deepcopy(ingredientlist) for ingredientlist in state['input'] if ingredientlist.recipe_name in counter_dict[key]]
         
             for complexIngredientList in complexIngredientList_by_mealtime:
-                count = counter_dict[key][complexIngredientList.recipe_name]
-                if key in ['Morgens', 'Nachmittags']: count *= 1.5
+                multiplier = counter_dict[key][complexIngredientList.recipe_name]
+                if key in ['Morgens','Mittags','Nachmittags']: multiplier *= 1.5
+                
+                self.LogMessage(f"Processing meals for: {key}")
+                
                 for ingredient in complexIngredientList.ingredients:
-                    ingredient.quantity = ingredient.quantity * count if ingredient.quantity is not None else 0
-                    ingredient.weight = ingredient.weight * count if ingredient.weight is not None else 0
+                    self.LogMessage(f"Processing ingredient: {ingredient.name} x {multiplier}")
+                    ingredient.quantity = ingredient.quantity * multiplier if ingredient.quantity is not None else 0
+                    ingredient.weight = ingredient.weight * multiplier if ingredient.weight is not None else 0
                 complexIngredientLists.append(complexIngredientList)
         return complexIngredientLists
+    
+    def LogMessage(self, message:str):
+        self.logger.LogMessage(message, self)

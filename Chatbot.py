@@ -1,4 +1,5 @@
 ﻿
+from venv import logger
 from langchain_core.output_parsers import StrOutputParser 
 from operator import itemgetter
 from langchain_core.prompts import PromptTemplate
@@ -48,7 +49,7 @@ class ChatbotWithHistory:
         systemmessage = '''        
             <|begin_of_text|>
             <|start_header_id|>system<|end_header_id|>
-            Du bist ein Freundlicher Koch, der sich am liebsten ueber Essen unterhaelt. Du redest aber auch gern ueber jedes andere Thema.          
+            Dein Name ist Susi Sonnenschein und liebst Pfannkuchen und Gänseblümchen.         
             <|eot_id|>
             '''
 
@@ -89,64 +90,53 @@ class ChatbotWithHistory:
         
         # restore pandas dataframe from json
         json_data = state['message'].split("shoppinglist:")[1]
-        df_restored = pd.read_json(StringIO(json_data), orient="split")
+        data_frame_weekplan = pd.read_json(StringIO(json_data), orient="split")
         
         # get list of receipe names from vector store
         recipes_and_ingredients = self.vector_store.get_recipes_from_last_source()
 
-        # List_of_mapped_recipes = mapping_function(state['pd dataframe'], Ingredient_List) -> llm
-        prompt = PromptTemplate.from_template(self.loader.read_from_file("ReceipeNameMapping.txt"))
-        recipeMapper = RunnableRecipeMapper(self.model, prompt)
+        # Recipe Mapping
+        
+        recipeMapper = RunnableRecipeMapper(self.model)
         
         state={}
-        state['short_recipe_names'] = df_restored
+        state['short_recipe_names'] = data_frame_weekplan
         state['recipe_names_with_ingredients'] = recipes_and_ingredients 
-        meals_by_mealtime = recipeMapper.invoke(state)
-                                               
-        # Load complexIngredients from disk
+        
+        try:
+            meals_by_time_of_day = recipeMapper.invoke(state)
+        except Exception as exc:
+            self.LogException(exc)
+            return "Fehler beim Rezept Matching. Versuche es erneut"
+        
+        # Recipe filtering
         source = self.vector_store.get_last_selected_source().split("\\")[-1]
         complex_ingredient_documents = load_documents_from_disk("Recipes/Json/ComplexIngredients.json")
-        
-        # Filter complexIngredients by source
-        filtered_complex_ingredient_documents = self.filter_documents_by_source(complex_ingredient_documents, source)
-        filtered_complex_ingredients_json = [json.loads(data.page_content) for data in filtered_complex_ingredient_documents]                
-        complex_ingredients = [ComplexIngredientList(**item) for item in filtered_complex_ingredients_json]
-        
-        # [morgens, mittags, abends, nachmittags]
-        mealtimes = df_restored.columns.tolist()
-        mealtimes.remove('Tag')
-
-        filtered_complexIngredients = []
-        for mealtime in mealtimes:
-            meals = meals_by_mealtime[mealtime] # morgens -> Counter
-            for item in complex_ingredients:
-                if item.recipe_name in meals.keys():
-                    filtered_complexIngredients.append(item)
+                
+        all_complex_ingredients_of_the_week = self.filter_ComplexIngredienta_by_source(complex_ingredient_documents, source)                        
+        filtered_complexIngredients = self.filter_complexIngredients_by_weekplan(all_complex_ingredients_of_the_week, meals_by_time_of_day)        
                        
-        
+        # recipe multiplying
         multiplier = RunnableMultiplier()
         state['input'] = filtered_complexIngredients
-        state['count'] = meals_by_mealtime
+        state['count'] = meals_by_time_of_day
         multiplied = multiplier.invoke(state)
         
+        # shopping list building
         state['input'] = multiplied
         shopping_list_builder = RunnableShoppingListBuilder()
         shoppingList_categoryItems = shopping_list_builder.invoke(state)
-
-        store_complex_ingredient_list_on_disk(complex_ingredients, 'logs/Chatbottest_original.json')
-        store_complex_ingredient_list_on_disk(multiplied, 'logs/Chatbottest_multiplied.json')
+       
         store_complex_ingredient_list_on_disk(shoppingList_categoryItems, 'logs/Chatbottest_shoppinglist.json')
-             
-
-        countedMeals = '\n'.join(
-            f"{item}: {count}" 
-            for mealcount in meals_by_mealtime.values()
-            for item, count in mealcount.items()) 
+            
+        combined_meal_counter = sum(meals_by_time_of_day.values(), Counter())
+        # return string building
+        countedMeals = '\n'.join(f"{item}: {count}" for item, count in combined_meal_counter.items()) 
         
         returnstring = ""
-        for item in shoppingList_categoryItems:
-            returnstring += f"{item.recipe_name}\n" # <--category
-            for ingredient in item.ingredients:
+        for recipe in shoppingList_categoryItems:
+            returnstring += f"{recipe.recipe_name}\n" # <--category
+            for ingredient in recipe.ingredients:
                 if(ingredient.unit != None):
                     returnstring += f" * {ingredient.name} {ingredient.quantity} x {ingredient.unit} ({ingredient.weight}g)\n"
                 else:
@@ -155,7 +145,7 @@ class ChatbotWithHistory:
         return "\n".join([countedMeals, "\n\nEinkaufsliste\n", returnstring])
           
     
-    def filter_documents_by_source(self, documents:List[Document], filterstr:str)->List[Document]:
+    def filter_ComplexIngredienta_by_source(self, documents:List[Document], filterstr:str)->list[ComplexIngredientList]:
         """
         Filters a list of documents to include only those where 'source' in metadata contains the specified filter string.
     
@@ -169,8 +159,18 @@ class ChatbotWithHistory:
         filtered_docs = [
             doc for doc in documents
             if filterstr in doc.metadata.get('source', '')
-        ]
-        return filtered_docs
+        ]        
+        filtered_complex_ingredients_json = [json.loads(data.page_content) for data in filtered_docs]                
+        complex_ingredients = [ComplexIngredientList(**item) for item in filtered_complex_ingredients_json]
+        return complex_ingredients
+
+    def filter_complexIngredients_by_weekplan(self, complexIngredients:list[ComplexIngredientList], meals_by_time_of_day:dict[str, Counter] )->list[ComplexIngredientList]:
+        filtered_complexIngredients = []
+        for recipes_counter in meals_by_time_of_day.values():             
+            for recipe in complexIngredients:
+                if recipe.recipe_name in recipes_counter.keys():
+                    filtered_complexIngredients.append(recipe)
+        return filtered_complexIngredients        
 
     def LogMessage(self, message:str):
         self.logger.LogMessage(message, self)

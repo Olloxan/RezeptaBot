@@ -1,9 +1,7 @@
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_core.documents import Document
-from typing import List, Tuple
-import chromadb 
-
+from typing import Tuple
 
 
 class VectorStore:
@@ -12,14 +10,14 @@ class VectorStore:
         self.db_path:str = db_persist_path
         self.collection_name:str = collection_name
         self.chroma_db = Chroma(persist_directory=self.db_path, embedding_function=self.embeddings, collection_name=self.collection_name)        
-        self.documents_and_scores : List[Tuple[Document, float]] = []
+        self.documents_and_scores : list[Tuple[Document, float]] = []
         self.last_selected_source:str = ""
 
     def get_chromaDB(self) -> Chroma:
         return Chroma(persist_directory=self.db_path, embedding_function=self.embeddings)
 
 
-    def retrieve_receipe_info(self, query:str)->List[str]:
+    def retrieve_receipe_info(self, query:str)->list[str]:
         """ Retrieves recipe info and stores current retrieval results"""
         self.documents_and_scores = self.chroma_db.similarity_search_with_score(query=query, k=10)
 
@@ -28,7 +26,7 @@ class VectorStore:
             recipes.append(document.page_content)
         return recipes
     
-    def get_receipe_List(self, index:int)->Tuple[List[str], str]:
+    def get_receipe_List(self, index:int)->Tuple[list[str], str]:
         """
         get the receipe with the given index from the current retrieval results.
         Retrieve all recipes with the same metadata from the database and return them as a list
@@ -44,7 +42,7 @@ class VectorStore:
                                                              
         return self.get_recipes_from_last_source(), source
     
-    def get_recipes_from_last_source(self)->List[str]:
+    def get_recipes_from_last_source(self)->list[str]:
         """get all reciipes strings from the last selected source"""
         collection = self.chroma_db.get(
             where={"source": self.last_selected_source},
