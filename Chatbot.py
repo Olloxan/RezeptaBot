@@ -136,18 +136,7 @@ class ChatbotWithHistory:
         store_complex_ingredient_list_on_disk(complex_ingredients, 'logs/Chatbottest_original.json')
         store_complex_ingredient_list_on_disk(multiplied, 'logs/Chatbottest_multiplied.json')
         store_complex_ingredient_list_on_disk(shoppingList_categoryItems, 'logs/Chatbottest_shoppinglist.json')
-       
-
-        # my_dict = {
-        #         "category1": Counter(a=2, b=3),
-        #         "category2": Counter(x=5, y=1)
-        #         }
-
-        # countedMeals = '\n'.join(
-        #     f"{item}: {count}" 
-        #     for mealcount in my_dict.values() 
-        #     for item, count in mealcount.items()
-        # )# count the meals
+             
 
         countedMeals = '\n'.join(
             f"{item}: {count}" 
