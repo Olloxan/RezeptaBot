@@ -17,14 +17,15 @@ class VectorStore:
         return Chroma(persist_directory=self.db_path, embedding_function=self.embeddings)
 
 
-    def retrieve_receipe_info(self, query:str)->list[str]:
+    def retrieve_receipe_info(self, query:str)->list[Tuple[str, float]]:
         """ Retrieves recipe info and stores current retrieval results"""
         self.documents_and_scores = self.chroma_db.similarity_search_with_score(query=query, k=10)
 
-        recipes = []
-        for document, score in self.documents_and_scores:
-            recipes.append(document.page_content)
-        return recipes
+        sorted_documents_and_scores = sorted(
+            [(doc.page_content, round(score, 2)) for doc, score in self.documents_and_scores], 
+            key=lambda x: x[1], reverse=True)
+        
+        return sorted_documents_and_scores
     
     def get_receipe_List(self, index:int)->Tuple[list[str], str]:
         """

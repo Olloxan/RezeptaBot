@@ -1,12 +1,13 @@
 ﻿from langchain_community.llms import Ollama
 from langchain_core.runnables import RunnableAssign
-from Utils import store_documents_on_disk, load_documents_from_disk
+from Utils import FileLoader
 from Runnables import RunnableRawIngredientExtracor, RunnableRecipeSeparator, RunnableComplexIngredientExtractor, RunnableEmbeddingStringBuilder
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
 from Logger import Logger
 
 logger = Logger()
+fileloader = FileLoader()
 # ggg.LogException(Exception("ö"), "ä")
 
 # Prepare Environment
@@ -78,14 +79,14 @@ llm = Ollama(model = modelname)
 #########################################################
 #   Part 4: Embedding String Generation & Embedding     #
 #########################################################
-pages = load_documents_from_disk("Recipes/Json/AllRecipes_separated.json")
+pages = fileloader.load_documents_from_disk("Recipes/Json/AllRecipes_separated.json")
 state = {'input': pages}
 
 
 embeddingStringBuilder = RunnableEmbeddingStringBuilder(llm)
 
 embedding_strings = embeddingStringBuilder.invoke(state)
-store_documents_on_disk(embedding_strings, 'logs/RecipeEmbeddingStrings.json') # --> Zwischenschritt
+fileloader.store_documents_on_disk(embedding_strings, 'logs/RecipeEmbeddingStrings.json') # --> Zwischenschritt
 
 
 embeddings = OllamaEmbeddings(model=embedding_modelname) 

@@ -12,18 +12,18 @@ import json
 
 from Runnables import RunnableRecipeMapper, RunnableMultiplier, RunnableShoppingListBuilder
 from VectorStore import VectorStore
-from FileLoader import FileLoader
+
 from BaseModels import ComplexIngredientList
-from Utils import load_documents_from_disk, store_complex_ingredient_list_on_disk
+from Utils import FileLoader
 from Logger import Logger
 
 
 class ChatbotWithHistory:
     def __init__(self, model, vector_store: VectorStore):
         self.model = model
-        self.vector_store = vector_store
-        self.loader = FileLoader()
+        self.vector_store = vector_store        
         self.logger = Logger()
+        self.fileLoader = FileLoader()
            
     def preloadModel(self):
         self.logger.LogMessage("Preloading chatbot model")
@@ -111,7 +111,7 @@ class ChatbotWithHistory:
         
         # Recipe filtering
         source = self.vector_store.get_last_selected_source().split("\\")[-1]
-        complex_ingredient_documents = load_documents_from_disk("Recipes/Json/ComplexIngredients.json")
+        complex_ingredient_documents = self.fileLoader.load_documents_from_disk("Recipes/Json/ComplexIngredients.json")
                 
         all_complex_ingredients_of_the_week = self.filter_ComplexIngredienta_by_source(complex_ingredient_documents, source)                        
         filtered_complexIngredients = self.filter_complexIngredients_by_weekplan(all_complex_ingredients_of_the_week, meals_by_time_of_day)        
@@ -127,7 +127,7 @@ class ChatbotWithHistory:
         shopping_list_builder = RunnableShoppingListBuilder()
         shoppingList_categoryItems = shopping_list_builder.invoke(state)
        
-        store_complex_ingredient_list_on_disk(shoppingList_categoryItems, 'logs/Chatbottest_shoppinglist.json')
+        self.fileLoader.store_complex_ingredient_list_on_disk(shoppingList_categoryItems, 'logs/Chatbottest_shoppinglist.json')
             
         combined_meal_counter = sum(meals_by_time_of_day.values(), Counter())
         # return string building

@@ -25,7 +25,7 @@ def chat_gen(message, history=[], return_buffer=True):
         yield buffer if return_buffer else token
     
 
-def document_retrieve(text_input):    
+def document_retrieve(text_input)->list[str]:    
     receipe_info = vector_store.retrieve_receipe_info(query=text_input)
     return receipe_info
 

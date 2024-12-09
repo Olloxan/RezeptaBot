@@ -8,12 +8,13 @@ import json
 from Runnables import RunnableDebugger as Debugger
 from Logger import Logger
 from BaseModels import RawIngredientList
-from Utils import read_text_from_file
+from Utils import FileLoader
 
 class RunnableRawIngredientExtracor(Runnable):
     def __init__(self, llm):
         self.llm = llm
-        self.extraction_prompt = PromptTemplate.from_template(read_text_from_file("Recipes/Prompts/RawIngredientExtraction_prompt.txt"))
+        fileloader = FileLoader()
+        self.extraction_prompt = PromptTemplate.from_template(fileloader.read_text_from_file("Recipes/Prompts/RawIngredientExtraction_prompt.txt"))
         self.output_validator_parser = PydanticOutputParser(pydantic_object=RawIngredientList)
         self.format_instruction_inserter = RunnableAssign({'format_instructions': lambda x: self.output_validator_parser.get_format_instructions()})   
         self.debugger = Debugger()

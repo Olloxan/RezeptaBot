@@ -12,14 +12,15 @@ from langsmith.utils import is_version_greater_or_equal
 from Runnables import RunnableDebugger as Debugger
 from langchain_core.prompts import PromptTemplate
 from Logger import Logger
-from Utils import read_text_from_file
+from Utils import FileLoader
 from BaseModels import ComplexIngredientList, RawIngredientList, Ingredient
 
 class RunnableComplexIngredientExtractor(Runnable):
     def __init__(self, llm):
         self.llm = llm
-        self.extraction_prompt = PromptTemplate.from_template(read_text_from_file("Recipes/Prompts/ComplexIngredientExtraction_prompt.txt"))
-        self.category_prompt = PromptTemplate.from_template(read_text_from_file("Recipes/Prompts/ComplexIngredientCategory_prompt.txt"))
+        fileloader = FileLoader()
+        self.extraction_prompt = PromptTemplate.from_template(fileloader.read_text_from_file("Recipes/Prompts/ComplexIngredientExtraction_prompt.txt"))
+        self.category_prompt = PromptTemplate.from_template(fileloader.read_text_from_file("Recipes/Prompts/ComplexIngredientCategory_prompt.txt"))
         self.output_validator_parser = PydanticOutputParser(pydantic_object=ComplexIngredientList)
         self.format_instruction_inserter = RunnableAssign({'format_instructions' : lambda x: self.output_validator_parser.get_format_instructions()})   
         self.debugger = Debugger()

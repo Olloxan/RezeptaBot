@@ -1,11 +1,9 @@
 from ast import Tuple
-from email import message
 from typing import List
-from winreg import EnumValue
 import gradio as gr
-import webbrowser
-import time
 import pandas as pd
+
+from Utils import FileLoader
 
 
 
@@ -13,6 +11,7 @@ class UserInterface:
     def __init__(self, chat_fn=None, doc_retrieval_fn=None) -> None:
         self._chat_function = chat_fn        
         self._doc_retrieval_function = doc_retrieval_fn
+        self.fileloader = FileLoader()
         
     def process_chain(self, text):
         if self._chain_function:
@@ -77,7 +76,7 @@ class UserInterface:
                                         "Rezept": [""]                                        
                                         })
 
-                        self.data_frame_retrieval = gr.DataFrame(value=initial_data, headers=["Nr.", "Rezept"], datatype=["number", "str"], wrap=True)
+                        self.data_frame_retrieval = gr.DataFrame(value=initial_data, headers=["Nr.", "Rezept", "Score"], datatype=["number", "str", "number"], wrap=True)
                         
                         self.receipe_selection = gr.Textbox(
                             label="Enter text for document chain",
@@ -121,6 +120,9 @@ class UserInterface:
     def _handle_dataframe_contents(self, dataframe:pd.DataFrame, chat_history:List[tuple]):
         """Return the DataFrame (Pandas Dataframe)."""        
         # soll an das Netzwerk gesendet werden, um die Einkaufsliste zu erstellen
+        
+        store_object_on_disk(dataframe, "logs/temp/weekplan.json")
+
         json_data = dataframe.to_json(orient="split")
         message = f"shoppinglist:{json_data}"
         
@@ -159,9 +161,10 @@ class UserInterface:
     def _handle_retrieval_chain(self, text_input: str) -> List[tuple]: 
         """Document retrieval: Input any ingredient and get corresponding recipes"""
         # Your chain processing logic here
-        listdata : List[str] = self._doc_retrieval_function(text_input)
+        # list[Tuple[str, float]]
+        listdata : list[Tuple[str, float]] = self._doc_retrieval_function(text_input)
                 
-        data = [(index, receipe) for index, receipe in enumerate(listdata)]
+        data = [(index, receipe, score) for index, (receipe, score) in enumerate(listdata)]
         return data
     
     def _handle_receipe_choice(self, index:str, chat_history:List[tuple]):
@@ -180,4 +183,6 @@ class UserInterface:
             yield None, chat_history   
         
         
+    def _build_initial_data(self):
+        pass
         
