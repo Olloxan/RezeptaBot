@@ -4,14 +4,14 @@ import gradio as gr
 import pandas as pd
 
 from Utils import FileLoader
-
-
+from Utils import ConfigManager
 
 class UserInterface:
     def __init__(self, chat_fn=None, doc_retrieval_fn=None) -> None:
         self._chat_function = chat_fn        
         self._doc_retrieval_function = doc_retrieval_fn
         self.fileloader = FileLoader()
+        self.config = ConfigManager()
         
     def process_chain(self, text):
         if self._chain_function:
@@ -30,20 +30,25 @@ class UserInterface:
                     with gr.Column(scale=1):
                         gr.Markdown("### Week Plan")
                         
+                        saved_data = self.config.read("initial_data")
+                        if saved_data:  # Ensure the key exists
+                            initial_data = pd.read_json(saved_data, orient="split")
+                        else:
+                            initial_data = pd.DataFrame({
+                            "Tag": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag", "Montag"],
+                            "Morgens": ["", "", "", "", "", "", "", ""],  
+                            "Mittags": ["", "", "", "", "", "", "", ""],
+                            "Abends": ["", "", "", "", "", "", "", ""],
+                            "Nachmittags": ["", "", "", "", "", "", "", ""]
+                            })
+                            
                         # initial_data = pd.DataFrame({
                         # "Tag": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag", "Montag"],
-                        # "Morgens": ["Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie", "Schoko Smoothie"],  
-                        # "Mittags": ["Pasta vegane Wurst", "Pasta vegane Wurst", "Pasta vegane Wurst", "Auflauf", "Auflauf", "Auflauf", "Auflauf", "Curry"],
-                        # "Abends": ["Avocado toast", "Avocado toast", "Avocado toast", "Avocado toast", "Curry", "Curry", "Curry", ""],
-                        # "Nachmittags": ["Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", "Bananen Eis", ""]
+                        # "Morgens": ["Pudding Oats", "Pudding Oats", "Pudding Oats", "Gebratene Haferflocken", "Gebratene Haferflocken", "Waffeln mit Sojajoghurt", "Waffeln mit Sojajoghurt", "Gebratene Haferflocken",],  
+                        # "Mittags": ["", "Saitan Braten", "Saitan Braten", "Saitan Braten", "Feta Pasta", "Quinoa Bowl", "", "",],
+                        # "Abends": ["Brokkoli Nudeln", "Brokkoli Nudeln", "", "Feta Pasta", "Feta Pasta", "Quinoa Bowl", "", "",],
+                        # "Nachmittags": ["Brombeer-Smoothie", "Brombeer-Smoothie", "Brombeer-Smoothie", "Brombeer-Smoothie", "Brombeer-Smoothie", "Brombeer-Smoothie", "Brombeer-Smoothie", "",]
                         # })
-                        initial_data = pd.DataFrame({
-                        "Tag": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag", "Montag"],
-                        "Morgens": ["Pudding Oats", "Pudding Oats", "Pudding Oats", "Gebratene Haferflocken", "Gebratene Haferflocken", "Waffeln mit Sojajoghurt", "Waffeln mit Sojajoghurt", "Gebratene Haferflocken",],  
-                        "Mittags": ["", "Saitan Braten", "Saitan Braten", "Saitan Braten", "Feta Pasta", "Quinoa Bowl", "", "",],
-                        "Abends": ["Brokkoli Nudeln", "Brokkoli Nudeln", "", "Feta Pasta", "Feta Pasta", "Quinoa Bowl", "", "",],
-                        "Nachmittags": ["Brombeer-Smoothie", "Brombeer-Smoothie", "Brombeer-Smoothie", "Brombeer-Smoothie", "Brombeer-Smoothie", "Brombeer-Smoothie", "Brombeer-Smoothie", "",]
-                        })
                         
                         self.data_frame_weekplan = gr.DataFrame(value=initial_data, headers=["Tag", "Morgens", "Mittags", "Abends", "Nachmittags"], label="Editable Table", interactive=True, show_label=False)
                         self.submit_btn_weekplan = gr.Button("Process Week Plan")
@@ -67,7 +72,7 @@ class UserInterface:
                             label="Enter text for document chain",
                             placeholder="Type your input here...",
                             show_label=False,
-                            value="pudding oats"
+                            value=self.config.read("last_retrieval_input")
                         )
                         self.submit_btn_retrieve = gr.Button("Retrieve Recipes")
                         
@@ -82,7 +87,7 @@ class UserInterface:
                             label="Enter text for document chain",
                             placeholder="Type your input here...",
                             show_label=False,
-                            value="2"
+                            value=self.config.read("last_receipe_selection")
                         )
                         self.submit_btn_receipe_select = gr.Button("Retrieve Recipes")
                 
@@ -110,8 +115,8 @@ class UserInterface:
         self.clear.click(fn=self._handle_chat_clear, inputs=None, outputs=self.chatbot, queue=False)
     
         # Document retrieval button
-        self.retrieval_input.submit(fn=self._handle_retrieval_chain, inputs=self.retrieval_input, outputs=self.data_frame_retrieval)
-        self.submit_btn_retrieve.click(fn=self._handle_retrieval_chain, inputs=self.retrieval_input, outputs=self.data_frame_retrieval)        
+        self.retrieval_input.submit(fn=self._retrieve_from_vectorstore, inputs=self.retrieval_input, outputs=self.data_frame_retrieval)
+        self.submit_btn_retrieve.click(fn=self._retrieve_from_vectorstore, inputs=self.retrieval_input, outputs=self.data_frame_retrieval)        
         
         self.receipe_selection.submit(fn=self._handle_receipe_choice, inputs=[self.receipe_selection, self.chatbot], outputs=[self.receipe_selection, self.chatbot])
         self.submit_btn_receipe_select.click(fn=self._handle_receipe_choice, inputs=[self.receipe_selection, self.chatbot],outputs=[self.receipe_selection, self.chatbot])
@@ -120,6 +125,7 @@ class UserInterface:
     def _handle_dataframe_contents(self, dataframe:pd.DataFrame, chat_history:List[tuple]):
         """Return the DataFrame (Pandas Dataframe)."""        
         # soll an das Netzwerk gesendet werden, um die Einkaufsliste zu erstellen
+        self.config.write("initial_data", dataframe.to_json(orient="split"))
         
         self.fileloader.store_object_on_disk(dataframe, "logs/temp/weekplan.json")
 
@@ -158,19 +164,17 @@ class UserInterface:
         return None
 
 ###################### right side: Document retrieval ######################
-    def _handle_retrieval_chain(self, text_input: str) -> List[tuple]: 
-        """Document retrieval: Input any ingredient and get corresponding recipes"""
-        # Your chain processing logic here
-        # list[Tuple[str, float]]
-        listdata : list[Tuple[str, float]] = self._doc_retrieval_function(text_input)
-                
+    def _retrieve_from_vectorstore(self, text_input: str) -> List[tuple]: 
+        """Document retrieval: Input any ingredient and get corresponding recipes"""       
+        self.config.write("last_retrieval_input", text_input)
+        listdata : list[Tuple[str, float]] = self._doc_retrieval_function(text_input)                
         data = [(index, receipe, score) for index, (receipe, score) in enumerate(listdata)]
         return data
     
     def _handle_receipe_choice(self, index:str, chat_history:List[tuple]):
         """Select any index of displayed recipes and return the whole week including the name of the source document.
         Uses a branch of the chatbot"""
-        
+        self.config.write("last_receipe_selection", index)
         message = f"retrieval:{index}"
         selection = f"Auswahl: {index}"
         chat_history.append((selection, ""))

@@ -23,15 +23,14 @@ class VectorStore:
         """ Retrieves recipe info and stores current retrieval results"""        
         self.documents_and_scores = self.chroma_db.similarity_search_with_score(query=query, k=10)
 
-        sorted_documents_and_scores = sorted(
-            [(doc.page_content, round(score, 2)) for doc, score in self.documents_and_scores], 
-            key=lambda x: x[1], reverse=True)
-        
-        if(len(sorted_documents_and_scores) == 0):
+        self.documents_and_scores = sorted(self.documents_and_scores, key=lambda x: x[1], reverse=True)
+                          
+        if(len(self.documents_and_scores) == 0):
             self.LogException(Exception(f"Something went wrong with the vecor store. Check path: {self.db_path}, Collectionname: {self.collection_name}"))
 
-        self.LogMessage(f"Retried {len(sorted_documents_and_scores)} recipes for query: {query}")
-        return sorted_documents_and_scores
+        self.LogMessage(f"Retried {len(self.documents_and_scores)} recipes for query: {query}")
+        
+        return [(doc.page_content, round(score, 2)) for doc, score in self.documents_and_scores]
     
     def get_receipe_List(self, index:int)->Tuple[list[str], str]:
         """

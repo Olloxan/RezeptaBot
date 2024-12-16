@@ -14,7 +14,7 @@ class RunnableRecipeMapper(Runnable):
         self.outputparser = StrOutputParser()      
         self.logger = Logger()
         self.debugger = Debugger()
-        self.num_tries = 3
+        self.num_tries = 5
     
     def invoke(self, state: dict)->dict[str, Counter]:
         """ state['short_recipe_names'] = pd.DataFrame

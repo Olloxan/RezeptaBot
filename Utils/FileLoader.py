@@ -6,8 +6,7 @@ from BaseModels import RawIngredientList, ComplexIngredientList
 from Logger import Logger
 
 class FileLoader():
-    def __init__(self) -> None:
-        self.directory = "Recipes/Prompts/"
+    def __init__(self) -> None:        
         self.logger = Logger()
        
     # Object
