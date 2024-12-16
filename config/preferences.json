@@ -1,9 +1,0 @@
-{
-  "dataset": {
-    "path": "F:/testwurst",
-    "isRelative": false
-  },
-  "models": {
-    "selected": "Llama 2 13B int4"
-  }
-}
