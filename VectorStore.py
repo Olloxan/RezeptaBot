@@ -16,7 +16,7 @@ class VectorStore:
         self.logger = Logger()
 
     def get_chromaDB(self) -> Chroma:
-        return Chroma(persist_directory=self.db_path, embedding_function=self.embeddings)
+        return Chroma(persist_directory=self.db_path, embedding_function=self.embeddings, collection_name=self.collection_name)
 
 
     def retrieve_receipe_info(self, query:str)->list[Tuple[str, float]]:

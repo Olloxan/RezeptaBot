@@ -6,18 +6,24 @@ class Logger:
     _instance = None
     _log_file = None 
 
-    def __new__(cls):
+    def __new__(cls, log_file_location: str = None):
+        """ Default Logfile location: logs/log_ """
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._initialize_logger()
+            cls._instance._initialize_logger(log_file_location)
         return cls._instance
    
 
     @classmethod
-    def _initialize_logger(cls):
+    def _initialize_logger(cls, log_file_location: str):
+        
         # Generate a unique log file name with a timestamp
         timestamp = datetime.now().strftime('%d.%m.%Y_%H-%M-%S')
-        cls._log_file = f"logs/log_{timestamp}.txt"
+        
+        if log_file_location:
+            cls._log_file = f"{log_file_location}{timestamp}.txt"
+        else:
+            cls._log_file = f"logs/log_{timestamp}.txt"
         
         # Ensure the log directory exists (optional)
         log_dir = os.path.dirname(cls._log_file)

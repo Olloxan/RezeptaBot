@@ -1,6 +1,4 @@
-﻿
-from venv import logger
-from langchain_core.output_parsers import StrOutputParser 
+﻿from langchain_core.output_parsers import StrOutputParser 
 from operator import itemgetter
 from langchain_core.prompts import PromptTemplate
 from typing import Counter, List, Union, Dict
