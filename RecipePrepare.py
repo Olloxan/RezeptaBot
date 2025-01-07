@@ -4,7 +4,7 @@ from Utils import FileLoader
 from Runnables import RunnableRawIngredientExtracor, RunnableRecipeSeparator, RunnableComplexIngredientExtractor, RunnableEmbeddingStringBuilder
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
-from Logger import Logger
+from Utils import Logger
 
 logger = Logger()
 fileloader = FileLoader()

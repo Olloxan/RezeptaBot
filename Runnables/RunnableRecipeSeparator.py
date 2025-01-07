@@ -3,7 +3,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain.docstore.document import Document
 from langchain_core.output_parsers import StrOutputParser
 
-from Logger import Logger
+from Utils import Logger
 from Runnables import RunnableDebugger as Debugger
 from Utils import FileLoader
 

@@ -4,7 +4,7 @@ from rich.style import Style
 from rich.console import Console
 import pickle
 
-from Logger import Logger
+from Utils import Logger
 
 console = Console()
 base_style = Style(color="#76B900", bold=True)

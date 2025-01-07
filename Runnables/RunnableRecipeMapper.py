@@ -2,7 +2,7 @@ from langchain_core.runnables import Runnable
 from langchain_core.output_parsers import StrOutputParser 
 from langchain_core.prompts import PromptTemplate
 from typing import Counter
-from Logger import Logger
+from Utils import Logger
 from Runnables import RunnableDebugger as Debugger
 from Utils import FileLoader
 

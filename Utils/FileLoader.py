@@ -3,7 +3,7 @@ import json
 from langchain.docstore.document import Document
 
 from BaseModels import RawIngredientList, ComplexIngredientList
-from Logger import Logger
+from .Logger import Logger
 
 class FileLoader():
     def __init__(self) -> None:        

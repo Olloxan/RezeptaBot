@@ -6,7 +6,7 @@ from langchain.docstore.document import Document
 
 
 from Runnables import RunnableDebugger as Debugger
-from Logger import Logger
+from Utils import Logger
 from BaseModels import RawIngredientList
 from Utils import FileLoader
 

@@ -13,7 +13,7 @@ from VectorStore import VectorStore
 
 from BaseModels import ComplexIngredientList
 from Utils import FileLoader
-from Logger import Logger
+from Utils import Logger
 
 
 class ChatbotWithHistory:

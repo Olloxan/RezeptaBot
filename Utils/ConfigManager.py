@@ -1,7 +1,7 @@
 import json
 import os
 from threading import Lock
-from Logger import Logger
+from .Logger import Logger
 
 class ConfigManager:
     _instance = None

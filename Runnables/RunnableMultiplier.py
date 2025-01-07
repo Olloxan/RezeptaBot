@@ -3,7 +3,7 @@ from langchain_core.runnables import Runnable
 import copy
 
 from BaseModels import ComplexIngredientList
-from Logger import Logger
+from Utils import Logger
 
 class RunnableMultiplier(Runnable):
     def __init__(self):

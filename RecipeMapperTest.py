@@ -2,7 +2,9 @@ import unittest
 from langchain_community.llms import Ollama
 import pandas as pd
 from io import StringIO
-from Logger import Logger
+
+from Utils import Logger
+
 # initialize logger with a timestamp
 Logger("Tests/Logs/log_")
 from Runnables import RunnableRecipeMapper

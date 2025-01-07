@@ -6,9 +6,9 @@ from langchain.docstore.document import Document
 import json
 
 from Runnables import RunnableDebugger as Debugger
-from Logger import Logger
 from BaseModels import RawIngredientList
 from Utils import FileLoader
+from Utils import Logger
 
 class RunnableRawIngredientExtracor(Runnable):
     def __init__(self, llm):
