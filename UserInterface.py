@@ -96,7 +96,7 @@ class UserInterface:
             
             # Launch the interface
             blocks.queue()
-            blocks.launch(debug=True, show_api=False, inline=False, server_port=port, inbrowser=True)
+            blocks.launch(debug=True, show_api=False, inline=False, inbrowser=True)
             
         except Exception as e:
             print(e)
@@ -125,7 +125,7 @@ class UserInterface:
     def _handle_dataframe_contents(self, dataframe:pd.DataFrame, chat_history:List[tuple]):
         """Return the DataFrame (Pandas Dataframe)."""        
         # soll an das Netzwerk gesendet werden, um die Einkaufsliste zu erstellen
-        self.config.write("initial_data", dataframe.to_json(orient="split"))
+        self.config.write("initial_data", dataframe.to_json(orient="split", force_ascii=False))
         
         self.fileloader.store_object_on_disk(dataframe, "logs/temp/weekplan.json")
 

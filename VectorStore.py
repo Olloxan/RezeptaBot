@@ -23,7 +23,7 @@ class VectorStore:
         """ Retrieves recipe info and stores current retrieval results"""        
         self.documents_and_scores = self.chroma_db.similarity_search_with_score(query=query, k=10)
 
-        self.documents_and_scores = sorted(self.documents_and_scores, key=lambda x: x[1], reverse=True)
+        self.documents_and_scores = sorted(self.documents_and_scores, key=lambda x: x[1])
                           
         if(len(self.documents_and_scores) == 0):
             self.LogException(Exception(f"Something went wrong with the vecor store. Check path: {self.db_path}, Collectionname: {self.collection_name}"))
