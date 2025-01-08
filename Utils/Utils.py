@@ -8,34 +8,38 @@ from .Logger import Logger
 logger = Logger()
 
 # Object
-def load_object_from_disk(path):
-    """Load the tokenizer from a file."""
+def load_object_from_disk(path, object_name=None):
+    """
+    Load an object from the specified file path using pickle. Returns the deserialized object.
+    """
     with open(path, "rb") as f:
         stored_object = pickle.load(f)
-    logger.LogMessage(f"stored_object loaded from {path}")
+    logger.LogMessage(f"Object {object_name if object_name else ''} loaded from {path}")
     return stored_object
 
-def store_object_on_disk(object_to_store, path):
-    """Save the tokenizer to a file."""
+def store_object_on_disk(object_to_store, path, object_name=None):
+    """
+    store an object to the specified file path using pickle.
+    """
     with open(path, "wb") as f:
         pickle.dump(object_to_store, f)
-    logger.LogMessage(f"Object saved to {path}")
+    logger.LogMessage(f"Object {object_name if object_name else ''} saved to {path}")
 
 
 # Documents
 def load_documents_from_disk(file_path:str) -> list[Document]:
-    # Read the JSON file
-    
-    with open(file_path, 'r', encoding="utf-8") as f:
-        serializable_docs = json.load(f)
+    """
+    Load documents from a JSON file, convert them to langchain Document objects, and return the list of documents.
+    """
+    serializable_docs = load_json_from_disk(file_path, "Documents")    
     # Convert to langchain Document objects
-    documents = [
-        Document(page_content=doc['page_content'], metadata=doc['metadata'])
-    for doc in serializable_docs]
-    logger.LogMessage(f"Documents loaded from {file_path}")
+    documents = [Document(page_content=doc['page_content'], metadata=doc['metadata']) for doc in serializable_docs]    
     return documents
 
 def store_documents_on_disk(documents:list[Document], file_path: str) -> None:
+    """
+    Store documents in a JSON file.
+    """
     serializable_docs = [
         {
             'page_content': doc.page_content,
@@ -43,41 +47,37 @@ def store_documents_on_disk(documents:list[Document], file_path: str) -> None:
         } for doc in documents
     ]
     # Write the documents to a JSON file
-    with open(file_path, 'w', encoding="utf-8") as f:
-        json.dump(serializable_docs, f, ensure_ascii=False)
-    logger.LogMessage(f"Documents saved to {file_path}")
-
+    store_json_on_disk(serializable_docs, file_path, "Documents")        
 
 # RawIngredients
 def store_raw_ingredient_lists_on_disk(obj_list: list[RawIngredientList], file_path: str):   
-    dict_list = [obj.dict() for obj in obj_list]
-    with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(dict_list, f, ensure_ascii=False)  # Save as pretty-printed JSON
-    logger.LogMessage(f"RawIngredientLists saved to {file_path}")
+    """
+    Convert a list of RawIngredientList objects to dictionaries and store them in a JSON file.
+    """
+    dict_list = [obj.model_dump() for obj in obj_list]
+    store_json_on_disk(dict_list, file_path, "RawIngredientLists")    
 
-def load_raw_ingredient_lists_from_disk(file_path: str) -> list[RawIngredientList]:    
-    with open(file_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    # Convert the list of dictionaries to a list of RawIngredientList objects
-    logger.LogMessage(f"RawIngredientLists loaded from {file_path}")    
+def load_raw_ingredient_lists_from_disk(file_path: str) -> list[RawIngredientList]:  
+    """
+    Load a list of RawIngredientList objects from a JSON file.
+    """  
+    data = load_json_from_disk(file_path, "RawIngredientLists")    
     return [RawIngredientList(**item) for item in data]
 
 
 # ComplexIngredients
-def store_complex_ingredient_list_on_disk(obj_list: list[ComplexIngredientList], file_path: str) -> None:
-    # Convert the Pydantic model to a dictionary
-    dict_list = [obj.dict() for obj in obj_list]    
-    # Write the dictionary as a JSON object to the file
-    with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(dict_list, f, ensure_ascii=False)
-    logger.LogMessage(f"ComplexIngredientLists saved to {file_path}")
+def store_complex_ingredient_list_on_disk(obj_list: list[ComplexIngredientList], file_path: str) -> None:    
+    """
+    Convert a list of ComplexIngredientList objects to dictionaries and store them in a JSON file.
+    """
+    dict_list = [obj.model_dump() for obj in obj_list]        
+    store_json_on_disk(dict_list, file_path, "ComplexIngredientLists")    
 
 def load_complex_ingredient_list_from_disk(file_path: str) -> list[ComplexIngredientList]:
-    # Read the JSON file
-    with open(file_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    # Convert the dictionary back to a Pydantic model
-    logger.LogMessage(f"ComplexIngredientLists loaded from {file_path}")    
+    """
+    Load a list of ComplexIngredientList objects from a JSON file.
+    """
+    data = load_json_from_disk(file_path, "ComplexIngredientLists")  
     return [ComplexIngredientList(**item) for item in data]
 
 # Text
@@ -94,5 +94,14 @@ def read_text_from_file(filename:str) -> str:
     logger.LogMessage(f"{filename} loaded from disk")
     return text
 
-
+# Json
+def store_json_on_disk(obj, file_path, object_name: str = None):
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False)
+    logger.LogMessage(f"Json object {object_name if object_name else ''} stored to {file_path}")
     
+def load_json_from_disk(file_path, object_name: str = None):
+    with open(file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    logger.LogMessage(f"Json object {object_name if object_name else ''} loaded from {file_path}")
+    return data
