@@ -21,9 +21,9 @@ class Logger:
         timestamp = datetime.now().strftime('%d.%m.%Y_%H-%M-%S')
         
         if log_file_location:
-            cls._log_file_location = f"{log_file_location}{timestamp}.txt"
+            cls._log_file_location = f"{log_file_location}{timestamp}.log"
         else:
-            cls._log_file_location = f"logs/log_{timestamp}.txt"
+            cls._log_file_location = f"logs/log_{timestamp}.log"
         
         # Ensure the log directory exists (optional)
         log_dir = os.path.dirname(cls._log_file_location)
