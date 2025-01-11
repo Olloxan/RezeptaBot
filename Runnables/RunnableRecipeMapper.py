@@ -20,11 +20,11 @@ class RunnableRecipeMapper(Runnable):
         """ state['short_recipe_names'] = pd.DataFrame
             state['recipe_names_with_ingredients'] = full_recipe_names (with ingredients)
         """
-        recipe_names = self.recipe_name_splitter(state)        
-        mealtimes = self.get_meal_times(state)
+        recipe_names = self.extract_recipe_names_from_embeddingstrings(state)        
+        mealtimes = self.extract_mealtimes(state)
         meals = {}
         for mealtime in mealtimes:            
-            short_recipe_names_by_mealtime = self.get_short_recipe_names_by_mealtime(state, mealtime)                        
+            short_recipe_names_by_mealtime = self.extract_short_recipe_names_by_mealtime(state, mealtime)                        
             success = False
             for i in range(self.num_tries):
                     
@@ -42,18 +42,35 @@ class RunnableRecipeMapper(Runnable):
             meals[mealtime] = Counter(chain_output_list)                       
         return meals
                         
-    def recipe_name_splitter(self, state:dict)->dict: 
-        """Converts: Schoko-Smoothie mit Beeren - Ingredients: B -> Schoko-Smoothie mit Beeren"""
+    def extract_recipe_names_from_embeddingstrings(self, state:dict)->dict: 
+        """ 
+        Extract recipe names form embedding strings
+        e.g. Schoko-Smoothie mit Beeren - Ingredients: B -> Schoko-Smoothie mit Beeren
+        """
         full_name_list:list[str] = [name.split(" - Ingredients")[0].strip() for name in state['recipe_names_with_ingredients']]
         full_receipe_names = "; ".join(full_name_list)
         return {'str' : full_receipe_names, 'list' : full_name_list}
     
-    def get_meal_times(self, state:dict)->list[str]:
+    def extract_mealtimes(self, state:dict)->list[str]:
+        """
+        Retrieve a list of meal-time columns names (['Morgens', 'Mittags', 'Nachmittags', 'Abends'])
+        from the 'short_recipe_names' DataFrame within the given state dictionary.
+        """
         mealtimes = state['short_recipe_names'].columns.tolist()
         mealtimes.remove('Tag')
         return mealtimes
 
-    def get_short_recipe_names_by_mealtime(self, state:dict, mealtime:list[str])->dict:
+    def extract_short_recipe_names_by_mealtime(self, state:dict, mealtime:str)->dict:
+        """
+        Retrieve all non-empty recipe names for a given mealtime from the 'short_recipe_names'
+        DataFrame in the provided state dictionary. The function returns a dictionary containing:
+        1) 'list': A list of recipe names
+        2) 'str' : A semicolon-separated string of the same recipe names
+
+        :param state: A dictionary with a pandas DataFrame under 'short_recipe_names' (with columns for different meal times).
+        :param mealtime: The name of the column (e.g., 'Morgens', 'Mittags') from which the recipes should be extracted.
+        :return: A dictionary with keys 'str' (semicolon-joined recipes) and 'list' (list of recipes).
+        """
         short_recipe_names = [item for item in state['short_recipe_names'][mealtime] if item != ""]
         short_recipe_name_string = "; ".join(short_recipe_names)
         return {'str' : short_recipe_name_string, 'list' : short_recipe_names}
