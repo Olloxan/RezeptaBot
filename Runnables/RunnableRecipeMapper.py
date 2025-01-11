@@ -59,7 +59,11 @@ class RunnableRecipeMapper(Runnable):
         return {'str' : short_recipe_name_string, 'list' : short_recipe_names}
     
     def runchain(self)->Runnable:
-        return ( self.prompt | self.debugger.Runnable_PrintTokencout(module=self) | self.llm | self.outputparser)
+        return ( self.prompt 
+                | self.debugger.Runnable_PrintTokencout(module=self) 
+                | self.llm 
+                | self.debugger.Runnable_PrintTextWithLabel(label="LLM output: ", module=self) 
+                | self.outputparser)
     
     def clean_string_and_convert_to_list(self, string:str)->list[str]:                 
         string = (string
@@ -90,7 +94,6 @@ class RunnableRecipeMapper(Runnable):
         conditions.append(len(chain_output_list) == len(short_name_list))                            
         return all(conditions)
         
-
     def LogMessage(self, message:str):
         self.logger.LogMessage(message, self)
             

@@ -35,11 +35,14 @@ class RunnableDebugger:
         num_tokens = len(tokens)
         print(f"Number of tokens: {num_tokens}")
 
-    def Runnable_PrintTextWithLabel(self, label="State: "):
-        def print_and_return(x, label=""):
-            self.logger.LogMessage(f"{label}{x}")
+    def Runnable_PrintTextWithLabel(self, label="State: ", module=None):
+        def print_and_return(x, label="", module=None):
+            if module:
+                self.logger.LogMessage(f"{label}{x}", instance=module)
+            else:
+                self.logger.LogMessage(f"{label}{x}")
             return x
-        return RunnableLambda(partial(print_and_return, label=label))
+        return RunnableLambda(partial(print_and_return, label=label, module=module))
 
     def Runnable_PrintStructureWithLabel(self, label="State: "):
         def print_and_return(x, label=""):

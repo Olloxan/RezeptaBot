@@ -4,38 +4,37 @@ from datetime import datetime
 
 class Logger:
     _instance = None
-    _log_file = None 
+    _log_file_location = None 
 
-    def __new__(cls, log_file_location: str = None):
+    def __new__(cls):
         """ Default Logfile location: logs/log_ """
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._initialize_logger(log_file_location)
+            cls._instance._initialize_logger()
         return cls._instance
    
 
     @classmethod
-    def _initialize_logger(cls, log_file_location: str):
+    def _initialize_logger(cls, log_file_location: str = None):
         
         # Generate a unique log file name with a timestamp
         timestamp = datetime.now().strftime('%d.%m.%Y_%H-%M-%S')
         
         if log_file_location:
-            cls._log_file = f"{log_file_location}{timestamp}.txt"
+            cls._log_file_location = f"{log_file_location}{timestamp}.txt"
         else:
-            cls._log_file = f"logs/log_{timestamp}.txt"
+            cls._log_file_location = f"logs/log_{timestamp}.txt"
         
         # Ensure the log directory exists (optional)
-        log_dir = os.path.dirname(cls._log_file)
+        log_dir = os.path.dirname(cls._log_file_location)
         if log_dir and not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        # Create the log file
-        with open(cls._log_file, 'w') as f:
-            pass  # Create an empty log file
+        # # Create the log file
+        # with open(cls._log_file_location, 'w') as f:
+        #     pass  # Create an empty log file
 
-        print(f"Logger initialized. Log file: {cls._log_file}")
-
+        print(f"Logger initialized. Log file: {cls._log_file_location}")    
 
     @staticmethod
     def _get_timestamp():
@@ -48,6 +47,12 @@ class Logger:
             %f : Microseconds (6 digits, zero-padded)
             """
         return datetime.now().strftime('%d.%m.%Y %H:%M:%S.%f')[:-3]
+
+    @classmethod
+    def Set_log_file_location(cls, new_log_file_location: str):
+        """Sets a new log file location."""        
+        cls._initialize_logger(new_log_file_location)                
+        print(f"Logger storage location changed. New log file: {cls._log_file_location}")
 
     @staticmethod
     def LogMessage(message: str, instance:object = None):
@@ -86,5 +91,5 @@ class Logger:
 
     @staticmethod
     def _write_Logmessage_to_file(log_message):
-        with open(Logger._log_file, 'a', encoding="utf-8") as f:
+        with open(Logger._log_file_location, 'a', encoding="utf-8") as f:
             f.write(json.dumps(log_message, ensure_ascii=False) + ',\n')
