@@ -10,7 +10,7 @@ class RunnableRecipeMapper(Runnable):
     def __init__(self, llm):
         self.llm = llm
         loader = FileLoader()
-        self.prompt = PromptTemplate.from_template(loader.read_text_from_file("Recipes/Prompts/ReceipeNameMapping_prompt.txt"))
+        self.prompt = PromptTemplate.from_template(loader.read_text_from_file("Recipes/Prompts/ReceipeNameMapping_prompt.prompt"))
         self.outputparser = StrOutputParser()      
         self.logger = Logger()
         self.debugger = Debugger()

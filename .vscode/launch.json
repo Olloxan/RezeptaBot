@@ -22,6 +22,13 @@
             "env": {
               
             }
+        },
+        {
+            "name": "Recipe Mapper Test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/RecipeMapperTest.py",
+            "console": "integratedTerminal"
         }
     ]
 }
