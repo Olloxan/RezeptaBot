@@ -25,8 +25,8 @@ class RunnableMultiplier(Runnable):
         
             for complexIngredientList in complexIngredientList_by_mealtime:
                 multiplier = counter_dict[key][complexIngredientList.recipe_name]
-                if key in ['Morgens','Mittags','Nachmittags']: multiplier *= 1.5
-                
+                if key in ['Morgens','Mittags']: multiplier *= 1.5
+                if key in ['Nachmittags']: multiplier *= 2
                 self.LogMessage(f"Processing meals for: {key}")
                 
                 for ingredient in complexIngredientList.ingredients:
