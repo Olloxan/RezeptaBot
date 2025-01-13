@@ -14,7 +14,7 @@ class RunnableEmbeddingStringBuilder(Runnable):
     def __init__(self, llm):
         self.llm = llm
         fileloader = FileLoader()
-        self.extraction_prompt = PromptTemplate.from_template(fileloader.read_text_from_file("Recipes/Prompts/EmbeddingStringExtraction_prompt.txt"))
+        self.extraction_prompt = PromptTemplate.from_template(fileloader.read_text_from_file("Recipes/Prompts/EmbeddingStringExtraction_prompt.prompt"))
         self.output_validator_parser = PydanticOutputParser(pydantic_object=RawIngredientList)
         self.format_instruction_inserter = RunnableAssign({'format_instructions': lambda x: self.output_validator_parser.get_format_instructions()})   
         self.debugger = Debugger()

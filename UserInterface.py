@@ -128,7 +128,7 @@ class UserInterface:
         self.config.write("initial_data", dataframe.to_json(orient="split", force_ascii=False))
         
         self.fileloader.store_object_on_disk(dataframe, "logs/temp/weekplan.json")
-
+        dataframe.to_csv("logs/weekplan.csv", index=False)
         json_data = dataframe.to_json(orient="split")
         message = f"shoppinglist:{json_data}"
         

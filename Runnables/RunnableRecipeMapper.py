@@ -35,14 +35,21 @@ class RunnableRecipeMapper(Runnable):
         for mealtime in mealtimes:            
             short_recipe_names_by_mealtime = self.extract_short_recipe_names_by_mealtime(state, mealtime)                        
                                                        
-            temp = []
+            extracted_recipes = []
+            cache = {}
             for item in short_recipe_names_by_mealtime['list']:
-                self.LogMessage(f"calling retriever with: {item}")
-                test = retriever.invoke(item)
-                self.LogMessage(f"retrieved: {test}")
-                temp.append(test[0].page_content)
+                self.LogMessage(f"retriving: {item}")
+                
+                if item in cache.keys():                                
+                    retrival = cache[item]
+                    self.LogMessage(f"From cache: {retrival[0].page_content}")    
+                else:                    
+                    retrival = retriever.invoke(item)
+                    cache[item] = retrival
+                    self.LogMessage(f"From Retriver: {retrival[0].page_content}")                
+                extracted_recipes.append(retrival[0].page_content)
                
-            meals[mealtime] = Counter(temp)                       
+            meals[mealtime] = Counter(extracted_recipes)                       
         return meals
                         
     def extract_recipe_names_from_embeddingstrings(self, state:dict)->dict: 
