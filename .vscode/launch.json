@@ -29,6 +29,13 @@
             "request": "launch",
             "program": "${workspaceFolder}/RecipeMapperTest.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Embedding String Builder Test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/EmbeddingStringBuilderTest.py",
+            "console": "integratedTerminal"
         }
     ]
 }
