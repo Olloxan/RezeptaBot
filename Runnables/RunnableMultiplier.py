@@ -30,7 +30,7 @@ class RunnableMultiplier(Runnable):
                 self.LogMessage(f"Processing meals for: {key}")
                 
                 for ingredient in complexIngredientList.ingredients:
-                    self.LogMessage(f"Processing ingredient: {ingredient.name} x {multiplier}")
+                    self.LogMessage(f"Multiplying {ingredient.name} by {multiplier}")
                     ingredient.quantity = ingredient.quantity * multiplier if ingredient.quantity is not None else 0
                     ingredient.weight = ingredient.weight * multiplier if ingredient.weight is not None else 0
                 complexIngredientLists.append(complexIngredientList)

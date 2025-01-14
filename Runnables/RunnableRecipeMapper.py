@@ -5,7 +5,6 @@ from langchain_community.vectorstores import DocArrayInMemorySearch
 from typing import Counter
 from Utils import Logger
 from Runnables import RunnableDebugger as Debugger
-from Utils import FileLoader
 
 class RunnableRecipeMapper(Runnable):
     def __init__(self, llm):

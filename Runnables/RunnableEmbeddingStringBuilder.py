@@ -21,7 +21,7 @@ class RunnableEmbeddingStringBuilder(Runnable):
         self.logger = Logger()
            
     def invoke(self, state: dict)->list[Document]:
-        """expected dict: state['input'] = List[document]"""
+        """expected dict: state['input'] = List[document] -> Complete Recipe"""
         
         ingredient_list = []
         for i, document in enumerate(state['input']):    

@@ -111,7 +111,7 @@ class ChatbotWithHistory:
         source = self.vector_store.get_last_selected_source().split("\\")[-1]
         complex_ingredient_documents = self.fileLoader.load_documents_from_disk("Recipes/Json/ComplexIngredients.json")
                 
-        all_complex_ingredients_of_the_week = self.filter_ComplexIngredienta_by_source(complex_ingredient_documents, source)                        
+        all_complex_ingredients_of_the_week = self.filter_ComplexIngredients_by_source(complex_ingredient_documents, source)                        
         filtered_complexIngredients = self.filter_complexIngredients_by_weekplan(all_complex_ingredients_of_the_week, meals_by_time_of_day)        
                        
         # recipe multiplying
@@ -143,7 +143,7 @@ class ChatbotWithHistory:
         return "\n".join([countedMeals, "\n\nEinkaufsliste\n", returnstring])
           
     
-    def filter_ComplexIngredienta_by_source(self, documents:List[Document], filterstr:str)->list[ComplexIngredientList]:
+    def filter_ComplexIngredients_by_source(self, documents:List[Document], filterstr:str)->list[ComplexIngredientList]:
         """
         Filters a list of documents to include only those where 'source' in metadata contains the specified filter string.
     
