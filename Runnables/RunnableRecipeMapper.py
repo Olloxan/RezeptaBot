@@ -1,6 +1,6 @@
 from langchain_core.runnables import Runnable
 from langchain_core.output_parsers import StrOutputParser 
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_ollama import OllamaEmbeddings
 from langchain_community.vectorstores import DocArrayInMemorySearch
 from typing import Counter
 from Utils import Logger

@@ -31,7 +31,7 @@ class ChatbotWithHistory:
     def stream(self, state: dict):
         # state['message'] = user message: str
         # state['history'] = history: [[(user) None, (agent) "Hello you!"]] (List of Lists)
-        
+        self.LogMessage(f"User message: {state['message']}")
         branch = RunnableBranch(
             #(condition, runnable)
             (lambda state: state['message'].startswith('retrieval:'), lambda state: self.allRecipesOfThisWeek(state)),
@@ -47,7 +47,7 @@ class ChatbotWithHistory:
         systemmessage = '''        
             <|begin_of_text|>
             <|start_header_id|>system<|end_header_id|>
-            Dein Name ist Susi Sonnenschein und liebst Pfannkuchen und Gänseblümchen.         
+            Du bist ein hilfreicher KI Assistent, der zuvorkommend auf alle meine Fragen antwortet.         
             <|eot_id|>
             '''
 

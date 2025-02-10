@@ -1,4 +1,4 @@
-from langchain_community.llms import Ollama
+from langchain_ollama import OllamaLLM
 from UserInterface import UserInterface
 from VectorStore import VectorStore
 from Chatbot import ChatbotWithHistory
@@ -7,7 +7,7 @@ from Chatbot import ChatbotWithHistory
 vector_store = VectorStore(collection_name='recipe_embeddings')
 
 modelname = "llama3.1:8b-instruct-q8_0"
-model = Ollama(model = modelname)
+model = OllamaLLM(model = modelname)
 chatbot = ChatbotWithHistory(model=model, vector_store=vector_store)
 chatbot.preloadModel()
 
