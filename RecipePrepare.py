@@ -1,8 +1,7 @@
-﻿from langchain_community.llms import Ollama
+﻿from langchain_ollama import OllamaLLM, OllamaEmbeddings
 from langchain_core.runnables import RunnableAssign
 from Utils import FileLoader
-from Runnables import RunnableRawIngredientExtracor, RunnableRecipeSeparator, RunnableComplexIngredientExtractor, RunnableEmbeddingStringBuilder
-from langchain_community.embeddings import OllamaEmbeddings
+from Runnables import RunnableRawIngredientExtracor, RunnableRecipeSeparator, RunnableComplexIngredientExtractor, RunnableEmbeddingStringBuilder, RunnableEmbeddingStringExtractor
 from langchain_community.vectorstores import Chroma
 from Utils import Logger
 
@@ -13,7 +12,7 @@ fileloader = FileLoader()
 # Prepare Environment
 modelname = "llama3.1:8b-instruct-q8_0"
 embedding_modelname = "mxbai-embed-large"
-llm = Ollama(model = modelname)
+llm = OllamaLLM(model = modelname)
 
 
 #################################
@@ -76,34 +75,49 @@ llm = Ollama(model = modelname)
 # store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), 'logs/Ingredients.json') # --> Zwischenschritt
 
 
-#########################################################
-#   Part 4: Embedding String Generation & Embedding     #
-#########################################################
-pages = fileloader.load_documents_from_disk("Recipes/Json/AllRecipes_separated.json")
+##################################################################################
+#   Part 4: Embedding String Generation if ComplexIngredients are not available  #
+##################################################################################
+# pages = fileloader.load_documents_from_disk("Recipes/Json/AllRecipes_separated.json")
+# state = {'input': pages}
+
+# embeddingStringBuilder = RunnableEmbeddingStringBuilder(llm)
+
+# embedding_strings = embeddingStringBuilder.invoke(state)
+# fileloader.store_documents_on_disk(embedding_strings, 'logs/RecipeEmbeddingStrings.json') # --> Zwischenschritt
+
+##############################################################################
+#   Part 5: Embedding String Extraction if ComplexIngredients are available  #
+##############################################################################
+
+pages = fileloader.load_documents_from_disk("Recipes/Json/ComplexIngredients.json")
 state = {'input': pages}
 
+embeddingStringExtractor = RunnableEmbeddingStringExtractor()
+embedding_strings = embeddingStringExtractor.invoke(state)
+fileloader.store_documents_on_disk(embedding_strings, 'logs/RecipeEmbeddingStrings.json')
 
-embeddingStringBuilder = RunnableEmbeddingStringBuilder(llm)
+################################
+#   Part 6: String Embedding   #
+################################
 
-embedding_strings = embeddingStringBuilder.invoke(state)
-fileloader.store_documents_on_disk(embedding_strings, 'logs/RecipeEmbeddingStrings.json') # --> Zwischenschritt
+# embeddings = OllamaEmbeddings(model=embedding_modelname) 
 
+# # Define the path where you want to store the ChromaDB database
+# db_path = 'logs/Chroma'
 
-embeddings = OllamaEmbeddings(model=embedding_modelname) 
-
-# Define the path where you want to store the ChromaDB database
-db_path = 'logs/Chroma'
-
-logger.LogMessage(f"Chroma path {db_path}")
-logger.LogMessage(f"Start generating embeddings for {len(pages)} documents.")
+# logger.LogMessage(f"Chroma path {db_path}")
+# logger.LogMessage(f"Start generating embeddings for {len(pages)} documents.")
 
 
-# Use Chroma as the vector store
-vector_store = Chroma.from_documents(
-    documents=embedding_strings,
-    embedding=embeddings,
-    persist_directory=db_path, 
-    collection_name='recipe_embeddings'
-)
+# # Use Chroma as the vector store
+# vector_store = Chroma.from_documents(
+#     documents=embedding_strings,
+#     embedding=embeddings,
+#     persist_directory=db_path, 
+#     collection_name='recipe_embeddings'
+# )
 
-logger.LogMessage(f"Embeddings generated and stored in ChromaDB at {db_path}")
+# logger.LogMessage(f"Embeddings generated and stored in ChromaDB at {db_path}")
+
+logger.LogMessage("Hello World")

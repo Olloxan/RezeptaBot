@@ -6,4 +6,5 @@ from .RunnableMultiplier import RunnableMultiplier
 from .RunnableRecipeSeparator import RunnableRecipeSeparator
 from .RunnableShoppingListBuilder import RunnableShoppingListBuilder
 from .RunnableEmbeddingStringBuilder import RunnableEmbeddingStringBuilder
+from .RunnableEmbeddingStringExtractor import RunnableEmbeddingStringExtractor
 

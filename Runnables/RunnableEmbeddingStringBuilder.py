@@ -2,7 +2,7 @@ from langchain_core.runnables import Runnable
 from langchain_core.runnables.passthrough import RunnableAssign
 from langchain.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
-from langchain.docstore.document import Document
+from langchain_core.documents import Document
 
 
 from Runnables import RunnableDebugger as Debugger
