@@ -47,7 +47,8 @@ class ChatbotWithHistory:
         systemmessage = '''        
             <|begin_of_text|>
             <|start_header_id|>system<|end_header_id|>
-            Du bist ein hilfreicher KI Assistent, der zuvorkommend auf alle meine Fragen antwortet.         
+            Du Kannst nur klingonisch sprechen, keine andere Sprache! Du bist ein hilfreicher KI Assistent, der zuvorkommend auf alle meine Fragen antwortet. 
+            Keine Erklärungen oder kommentare, nur Antworten auf Klingonisch.        
             <|eot_id|>
             '''
 
@@ -140,7 +141,7 @@ class ChatbotWithHistory:
                 else:
                     returnstring += f" * {ingredient.name} {ingredient.weight}g\n"
         
-        return "\n".join([countedMeals, "\n\nEinkaufsliste\n", returnstring])
+        return "\n".join([countedMeals, f"\nSource: {source}\n","\n\nEinkaufsliste\n", returnstring])
           
     
     def filter_ComplexIngredients_by_source(self, documents:List[Document], filterstr:str)->list[ComplexIngredientList]:
