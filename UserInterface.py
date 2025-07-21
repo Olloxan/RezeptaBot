@@ -35,7 +35,7 @@ class UserInterface:
                             initial_data = pd.read_json(saved_data, orient="split")
                         else:
                             initial_data = pd.DataFrame({
-                            "Tag": ["Samstag", "Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"],
+                            "Tag": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag", "Montag"],
                             "Morgens": ["", "", "", "", "", "", "", ""],  
                             "Mittags": ["", "", "", "", "", "", "", ""],
                             "Abends": ["", "", "", "", "", "", "", ""],
