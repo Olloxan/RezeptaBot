@@ -3,10 +3,13 @@ from UserInterface import UserInterface
 from VectorStore import VectorStore
 from Chatbot import ChatbotWithHistory
 
+import os
+os.environ["OLLAMA_HOST"] = "http://127.0.0.1:11434"
+
 
 vector_store = VectorStore(collection_name='recipe_embeddings')
 
-modelname = "llama3.1:8b-instruct-q8_0"
+modelname = "qwen3:latest"
 model = OllamaLLM(model = modelname)
 chatbot = ChatbotWithHistory(model=model, vector_store=vector_store)
 chatbot.preloadModel()

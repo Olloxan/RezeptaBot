@@ -4,13 +4,15 @@ from Utils import FileLoader
 from Runnables import RunnableRawIngredientExtracor, RunnableRecipeSeparator, RunnableComplexIngredientExtractor, RunnableEmbeddingStringBuilder, RunnableEmbeddingStringExtractor
 from langchain_community.vectorstores import Chroma
 from Utils import Logger
+import os
+os.environ["OLLAMA_HOST"] = "http://127.0.0.1:11434"
 
 logger = Logger()
 fileloader = FileLoader()
 # ggg.LogException(Exception("ö"), "ä")
 
 # Prepare Environment
-modelname = "llama3.1:8b-instruct-q8_0"
+modelname = "qwen3:latest"
 embedding_modelname = "mxbai-embed-large"
 llm = OllamaLLM(model = modelname)
 
@@ -35,44 +37,41 @@ llm = OllamaLLM(model = modelname)
 #############################################
 #   Part 3: Complex Ingredient Extraction   #
 #############################################
-# pages = load_documents_from_disk("Recipes/Json/AllRecipes_separated.json")
-# ingredients = load_documents_from_disk("Recipes/Json/IngredientList.json")
+pages = fileloader.load_documents_from_disk("Recipes/Json/AllRecipes_separated.json")
+# ingredients = fileloader.load_documents_from_disk("Recipes/Json/IngredientList.json")
  
-# rawIngredientExtracor = RunnableRawIngredientExtracor(llm)
-# # rawIngredientExtracor = RunnableAssign({'input':RunnableRawIngredientExtracor(llm)})
-# complexIngredientExtractor = RunnableComplexIngredientExtractor(llm)
+# rawIngredientExtracor = RunnableAssign({'input':RunnableRawIngredientExtracor(llm)})
+complexIngredientExtractor = RunnableComplexIngredientExtractor(llm)
 # complexIngredientExtractor.set_IngredientList(ingredients)
 
-# state={}
-# complexIngredients = []
+state={}
+complexIngredients = []
 
-# for i, document in enumerate(pages):
-#     success = True
-#     for j in range(5):        
-#         try:
-#             logger.LogMessage(f"Processing document {i} of {len(pages) - 1}")
-#             state['input'] = document
-#             # complexIngredient = (rawIngredientExtracor | complexIngredientExtractor).invoke(state)            
-#             state['input'] = rawIngredientExtracor.invoke(state)            
-#             complexIngredient = complexIngredientExtractor.invoke(state)            
-#             success = True
-#             break
-#         except Exception as exc:
-#             logger.LogException(exc, f"Error processing document {i}. Source is: {document.metadata['source']}, page: {document.metadata['page']}")            
-#             success = False
+for i, document in enumerate(pages):
+    success = True
+    for j in range(5):        
+        try:
+            logger.LogMessage(f"Processing document {i} of {len(pages) - 1}")
+            state['input'] = document
+            complexIngredient = complexIngredientExtractor.invoke(state)            
+            success = True
+            break
+        except Exception as exc:
+            logger.LogException(exc, f"Error processing document {i}. Source is: {document.metadata['source']}, page: {document.metadata['page']}")            
+            success = False
             
-#     if success == False:
-#         logger.LogException(Exception(f"Failed to separate document. Source: {document.metadata['source']}, page: {document.metadata['page']}"), f"Processing failed 5 times. Continuing")
-#         store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), 'logs/Ingredients.json') # --> Zwischenschritt
-#     complexIngredients.append(complexIngredient)
+    if success == False:
+        logger.LogException(Exception(f"Failed to separate document. Source: {document.metadata['source']}, page: {document.metadata['page']}"), f"Processing failed 5 times. Continuing")
+        fileloader.store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), 'logs/Ingredients.json') # --> Zwischenschritt
+    complexIngredients.append(complexIngredient)
     
-#     if i % 50 == 0:
-#         logger.LogMessage(f"Storing documents on disk. Document {i} of {len(pages) - 1}")
-#         store_documents_on_disk(complexIngredients, f"logs/ComplexIngredients_{i}.json") # --> Zwischenschritt
-#         store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), f"logs/Ingredients_{i}.json") # --> Zwischenschritt
+    if i % 50 == 0:
+        logger.LogMessage(f"Storing documents on disk. Document {i} of {len(pages) - 1}")
+        fileloader.store_documents_on_disk(complexIngredients, f"logs/ComplexIngredients_{i}.json") # --> Zwischenschritt
+        fileloader.store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), f"logs/Ingredients_{i}.json") # --> Zwischenschritt
     
-# store_documents_on_disk(complexIngredients, 'logs/ComplexIngredients.json') # --> Zwischenschritt
-# store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), 'logs/Ingredients.json') # --> Zwischenschritt
+fileloader.store_documents_on_disk(complexIngredients, 'logs/ComplexIngredients.json') # --> Zwischenschritt
+fileloader.store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), 'logs/Ingredients.json') # --> Zwischenschritt
 
 
 ##################################################################################
@@ -90,12 +89,12 @@ llm = OllamaLLM(model = modelname)
 #   Part 5: Embedding String Extraction if ComplexIngredients are available  #
 ##############################################################################
 
-pages = fileloader.load_documents_from_disk("Recipes/Json/ComplexIngredients.json")
-state = {'input': pages}
+# pages = fileloader.load_documents_from_disk("Recipes/Json/ComplexIngredients.json")
+# state = {'input': pages}
 
-embeddingStringExtractor = RunnableEmbeddingStringExtractor()
-embedding_strings = embeddingStringExtractor.invoke(state)
-fileloader.store_documents_on_disk(embedding_strings, 'logs/RecipeEmbeddingStrings.json')
+# embeddingStringExtractor = RunnableEmbeddingStringExtractor()
+# embedding_strings = embeddingStringExtractor.invoke(state)
+# fileloader.store_documents_on_disk(embedding_strings, 'logs/RecipeEmbeddingStrings.json')
 
 ################################
 #   Part 6: String Embedding   #

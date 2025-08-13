@@ -4,6 +4,7 @@ from langchain.output_parsers import PydanticOutputParser
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.documents import Document
 import json
+import re
 
 
 from Runnables import RunnableDebugger as Debugger
@@ -27,10 +28,7 @@ class RunnableComplexIngredientExtractor(Runnable):
         self.strOutputParser = StrOutputParser()
 
     def invoke(self, state:dict, config=None)->Document:
-        """ expected dict: state['input'] = Document """                            
-        rawIngredientList = RawIngredientList(**json.loads(state['input'].page_content))
-        
-        self.LogMessage(f"Extracting Complex Ingredients for: {rawIngredientList.recipe_name}")
+        """ expected dict: state['input'] = Document """    
         
         success = True
         for i in range(self.num_extraction_tries): # try multiple times to extract the data
@@ -38,43 +36,68 @@ class RunnableComplexIngredientExtractor(Runnable):
                 self.LogMessage(f"Try: {i}")
                 
                 success = True                                                         
-                complex_ingredients = (self.extract_complex_ingredients() | self.set_category).invoke({'input' : rawIngredientList})                                        
+                # complex_ingredients = (self.extract_complex_ingredients() | self.set_category).invoke(state) 
+                complex_ingredients = self.extract_complex_ingredients().invoke(state) 
                 break
             except Exception as exc:
-                self.LogException(exc, f"Error decoding JSON for {rawIngredientList.recipe_name}.")
+                self.LogException(exc, f"Error decoding JSON for .")
                 success = False
         if not success:
-            raise Exception(f"Failed to extract Complex Ingredients for {rawIngredientList.recipe_name} {self.num_extraction_tries} times")
+            raise Exception(f"Failed to extract Complex Ingredients for  {self.num_extraction_tries} times")
                         
-        document = Document(page_content=json.dumps(complex_ingredients.dict(), ensure_ascii=False), metadata=state['input'].metadata)         
+        document = Document(page_content=json.dumps(complex_ingredients, ensure_ascii=False), metadata=state['input'].metadata)         
         return document
 
     def extract_complex_ingredients(self)->Runnable:
-        return (self.format_instruction_inserter 
-                | self.extraction_prompt 
-                | self.debugger.Runnable_PrintTokencout(module=self) 
+        return (
+                self.extraction_prompt 
+                | self.debugger.Runnable_PrintStructureWithLabel("extraction Prompt")
                 | self.llm
+                | self.debugger.Runnable_PrintStructureWithLabel("llm output")
                 | self.clean_and_format_output 
-                | self.output_validator_parser 
-                | self.set_quantity_none)
+                | self.validate_recipe)
         
     def clean_and_format_output(self, string):
-        if '{' not in string: string = '{' + string
-        if '}' not in string: string = string + '}'
-        string = (string
-            .replace("\\_", "_")
-            .replace("\n", " ")
-            .replace("\]", "]")
-            .replace("\[", "[")
-        ) 
-        return string 
+        # Assuming original_text is your input string
+        cleaned_string = re.sub(r'<think>[\s\S]*?</think>', '', string, flags=re.IGNORECASE).strip()
+        cleaned_string = re.sub(r'(\r\n|\n|\r)', '', cleaned_string)
+        cleaned_string = re.sub(r'\s+', ' ', cleaned_string)
+        return cleaned_string 
     
+    def validate_recipe(self, recipe):
+        errors = []
+        jsondata = json.loads(recipe)
+        # Check top-level keys
+        if 'recipe_name' not in jsondata or not isinstance(jsondata['recipe_name'], str):
+            errors.append("Missing or invalid 'recipe_name'")
+
+        if 'ingredients' not in jsondata or not isinstance(jsondata['ingredients'], list):
+            errors.append("Missing or invalid 'ingredients' (must be a list)")
+
+        else:
+            for i, ing in enumerate(jsondata['ingredients']):
+                if 'name' not in ing or not isinstance(ing['name'], str):
+                    errors.append(f"Ingredient {i}: missing or invalid 'name'")
+                if 'weight' not in ing or not isinstance(ing['weight'], (int, float)):
+                    errors.append(f"Ingredient {i}: missing or invalid 'weight'")
+                if 'category' not in ing or not isinstance(ing['category'], str):
+                    errors.append(f"Ingredient {i}: missing or invalid 'category'")
+                if 'quantity' in ing and ing['quantity'] is not None and not isinstance(ing['quantity'], (int, float)):
+                    errors.append(f"Ingredient {i}: 'quantity' must be number or null")
+                if 'unit' in ing and ing['unit'] is not None and not isinstance(ing['unit'], str):
+                    errors.append(f"Ingredient {i}: 'unit' must be string or null")
+                
+        if len(errors) != 0:
+            raise ValueError(f"Invalid json: {', '.join(errors)}")
+
+        return jsondata
+
     def set_quantity_none(self, complexIngredientList:ComplexIngredientList)->ComplexIngredientList:
         for ingredient in complexIngredientList.ingredients:
             if ingredient.unit == None:
                 ingredient.quantity = None
         return complexIngredientList
-        
+
     def set_category(self, complexIngredientList:ComplexIngredientList)->ComplexIngredientList:
         self.LogMessage(f"Setting ingredient categories for {complexIngredientList.recipe_name}")
         for ingredient in complexIngredientList.ingredients:
@@ -102,7 +125,9 @@ class RunnableComplexIngredientExtractor(Runnable):
     
     def select_category(self)->Runnable:
         """ select one of the following categories for the ingredent: Obst/Gemüse, Vegan, Milchprodukte, Tiefkühl, Sonstiges """
-        return (self.category_prompt | self.debugger.Runnable_PrintTokencout(module=self) | self.llm | self.strOutputParser)
+        return (self.category_prompt 
+                | self.llm 
+                | self.strOutputParser)
     
     def get_category(self, ingredient):
         for item in self.ingredient_list:

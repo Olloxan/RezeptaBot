@@ -36,6 +36,13 @@
             "request": "launch",
             "program": "${workspaceFolder}/EmbeddingStringBuilderTest.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Recipe Prepare",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/RecipePrepare.py",
+            "console": "integratedTerminal"
         }
     ]
 }

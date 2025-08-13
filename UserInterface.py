@@ -1,4 +1,3 @@
-from ast import Tuple
 from typing import List
 import gradio as gr
 import pandas as pd
@@ -168,7 +167,7 @@ class UserInterface:
     def _retrieve_from_vectorstore(self, text_input: str) -> List[tuple]: 
         """Document retrieval: Input any ingredient and get corresponding recipes"""       
         self.config.write("last_retrieval_input", text_input)
-        listdata : list[Tuple[str, float]] = self._doc_retrieval_function(text_input)                
+        listdata : list[tuple[str, float]] = self._doc_retrieval_function(text_input)                
         data = [(index, receipe, score) for index, (receipe, score) in enumerate(listdata)]
         return data
     
