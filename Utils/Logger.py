@@ -67,6 +67,15 @@ class Logger:
         # Write the message to the log file in JSON format
         Logger._write_Logmessage_to_file(log_message)
         
+    @staticmethod
+    def LogMessageNoPrint(message: str, instance:object = None):
+        # Get the current timestamp
+        class_name = instance.__class__.__name__ if instance else "Default"
+        timestamp = Logger._get_timestamp()
+        log_message = {"time": timestamp, "Module": class_name, "Message": message}
+        
+        # Write the message to the log file in JSON format
+        Logger._write_Logmessage_to_file(log_message)
 
     @staticmethod
     def LogException(exception: Exception, message: str = "processing failed", instance:object = None):

@@ -11,7 +11,7 @@ from Runnables import RunnableDebugger as Debugger
 from langchain_core.prompts import PromptTemplate
 from Utils import Logger
 from Utils import FileLoader
-from BaseModels import ComplexIngredientList, RawIngredientList, Ingredient
+from BaseModels import ComplexIngredientList, Ingredient
 
 class RunnableComplexIngredientExtractor(Runnable):
     def __init__(self, llm):
@@ -36,8 +36,8 @@ class RunnableComplexIngredientExtractor(Runnable):
                 self.LogMessage(f"Try: {i}")
                 
                 success = True                                                         
-                # complex_ingredients = (self.extract_complex_ingredients() | self.set_category).invoke(state) 
-                complex_ingredients = self.extract_complex_ingredients().invoke(state) 
+                complex_ingredients = (self.extract_complex_ingredients() | self.set_category).invoke(state) 
+                # complex_ingredients = self.extract_complex_ingredients().invoke(state) 
                 break
             except Exception as exc:
                 self.LogException(exc, f"Error decoding JSON for .")
@@ -45,17 +45,16 @@ class RunnableComplexIngredientExtractor(Runnable):
         if not success:
             raise Exception(f"Failed to extract Complex Ingredients for  {self.num_extraction_tries} times")
                         
-        document = Document(page_content=json.dumps(complex_ingredients, ensure_ascii=False), metadata=state['input'].metadata)         
+        document = Document(page_content=json.dumps(complex_ingredients.dict(), ensure_ascii=False), metadata=state['input'].metadata)         
         return document
 
     def extract_complex_ingredients(self)->Runnable:
-        return (
-                self.extraction_prompt 
-                | self.debugger.Runnable_PrintStructureWithLabel("extraction Prompt")
+        return (self.extraction_prompt 
+                | self.debugger.Runnable_PrintStructureWithLabel("instruction Prompt")
                 | self.llm
-                | self.debugger.Runnable_PrintStructureWithLabel("llm output")
                 | self.clean_and_format_output 
-                | self.validate_recipe)
+                | self.validate_recipe
+                | self.output_validator_parser)
         
     def clean_and_format_output(self, string):
         # Assuming original_text is your input string
@@ -90,7 +89,7 @@ class RunnableComplexIngredientExtractor(Runnable):
         if len(errors) != 0:
             raise ValueError(f"Invalid json: {', '.join(errors)}")
 
-        return jsondata
+        return recipe
 
     def set_quantity_none(self, complexIngredientList:ComplexIngredientList)->ComplexIngredientList:
         for ingredient in complexIngredientList.ingredients:
@@ -126,7 +125,11 @@ class RunnableComplexIngredientExtractor(Runnable):
     def select_category(self)->Runnable:
         """ select one of the following categories for the ingredent: Obst/Gemüse, Vegan, Milchprodukte, Tiefkühl, Sonstiges """
         return (self.category_prompt 
+                | self.debugger.Runnable_PrintStructureWithLabel("recipe Prompt")
                 | self.llm 
+                | self.debugger.Runnable_PrintStructureWithLabel("Recipe llm output")
+                | self.clean_and_format_output
+                | self.debugger.Runnable_PrintStructureWithLabel("Recipe cleaned")
                 | self.strOutputParser)
     
     def get_category(self, ingredient):

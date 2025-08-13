@@ -38,11 +38,11 @@ llm = OllamaLLM(model = modelname)
 #   Part 3: Complex Ingredient Extraction   #
 #############################################
 pages = fileloader.load_documents_from_disk("Recipes/Json/AllRecipes_separated.json")
-# ingredients = fileloader.load_documents_from_disk("Recipes/Json/IngredientList.json")
+ingredients = fileloader.load_documents_from_disk("Recipes/Json/IngredientList.json")
  
 # rawIngredientExtracor = RunnableAssign({'input':RunnableRawIngredientExtracor(llm)})
 complexIngredientExtractor = RunnableComplexIngredientExtractor(llm)
-# complexIngredientExtractor.set_IngredientList(ingredients)
+complexIngredientExtractor.set_IngredientList(ingredients)
 
 state={}
 complexIngredients = []
@@ -65,7 +65,8 @@ for i, document in enumerate(pages):
         fileloader.store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), 'logs/Ingredients.json') # --> Zwischenschritt
     complexIngredients.append(complexIngredient)
     
-    if i % 50 == 0:
+    if True:
+    # if i % 50 == 0:
         logger.LogMessage(f"Storing documents on disk. Document {i} of {len(pages) - 1}")
         fileloader.store_documents_on_disk(complexIngredients, f"logs/ComplexIngredients_{i}.json") # --> Zwischenschritt
         fileloader.store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), f"logs/Ingredients_{i}.json") # --> Zwischenschritt
