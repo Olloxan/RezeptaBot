@@ -12,7 +12,7 @@ fileloader = FileLoader()
 # ggg.LogException(Exception("ö"), "ä")
 
 # Prepare Environment
-modelname = "qwen3:latest"
+modelname = "llama3.1:latest"
 embedding_modelname = "mxbai-embed-large"
 llm = OllamaLLM(model = modelname)
 
@@ -63,10 +63,10 @@ for i, document in enumerate(pages):
     if success == False:
         logger.LogException(Exception(f"Failed to separate document. Source: {document.metadata['source']}, page: {document.metadata['page']}"), f"Processing failed 5 times. Continuing")
         fileloader.store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), 'logs/Ingredients.json') # --> Zwischenschritt
+        continue
     complexIngredients.append(complexIngredient)
     
-    if True:
-    # if i % 50 == 0:
+    if i % 50 == 0:
         logger.LogMessage(f"Storing documents on disk. Document {i} of {len(pages) - 1}")
         fileloader.store_documents_on_disk(complexIngredients, f"logs/ComplexIngredients_{i}.json") # --> Zwischenschritt
         fileloader.store_documents_on_disk(complexIngredientExtractor.get_IngredientList(), f"logs/Ingredients_{i}.json") # --> Zwischenschritt

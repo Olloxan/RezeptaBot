@@ -38,7 +38,7 @@ class RunnableEmbeddingStringBuilder(Runnable):
         return ingredient_list
 
     def extract_ingredients(self)->Runnable:
-        return (self.format_instruction_inserter | self.extraction_prompt | self.debugger.Runnable_PrintTokencout(module=self) | self.llm | self.clean_and_format_output | self.output_validator_parser | self.generate_embedding_text)
+        return (self.format_instruction_inserter | self.extraction_prompt | self.llm | self.clean_and_format_output | self.output_validator_parser | self.generate_embedding_text)
         
     def clean_and_format_output(self, string:str)->str:
         if '{' not in string: string = '{' + string

@@ -40,7 +40,7 @@ class RunnableComplexIngredientExtractor(Runnable):
                 # complex_ingredients = self.extract_complex_ingredients().invoke(state) 
                 break
             except Exception as exc:
-                self.LogException(exc, f"Error decoding JSON for .")
+                self.LogException(exc)
                 success = False
         if not success:
             raise Exception(f"Failed to extract Complex Ingredients for  {self.num_extraction_tries} times")
@@ -50,7 +50,6 @@ class RunnableComplexIngredientExtractor(Runnable):
 
     def extract_complex_ingredients(self)->Runnable:
         return (self.extraction_prompt 
-                | self.debugger.Runnable_PrintStructureWithLabel("instruction Prompt")
                 | self.llm
                 | self.clean_and_format_output 
                 | self.validate_recipe
@@ -61,34 +60,38 @@ class RunnableComplexIngredientExtractor(Runnable):
         cleaned_string = re.sub(r'<think>[\s\S]*?</think>', '', string, flags=re.IGNORECASE).strip()
         cleaned_string = re.sub(r'(\r\n|\n|\r)', '', cleaned_string)
         cleaned_string = re.sub(r'\s+', ' ', cleaned_string)
+        cleaned_string = re.sub(r'^```json\s*|\s*```$', '', cleaned_string)
+
         return cleaned_string 
     
     def validate_recipe(self, recipe):
         errors = []
-        jsondata = json.loads(recipe)
-        # Check top-level keys
-        if 'recipe_name' not in jsondata or not isinstance(jsondata['recipe_name'], str):
-            errors.append("Missing or invalid 'recipe_name'")
+        try:
+            jsondata = json.loads(recipe)
+            # Check top-level keys
+            if 'recipe_name' not in jsondata or not isinstance(jsondata['recipe_name'], str):
+                errors.append("Missing or invalid 'recipe_name'")
 
-        if 'ingredients' not in jsondata or not isinstance(jsondata['ingredients'], list):
-            errors.append("Missing or invalid 'ingredients' (must be a list)")
+            if 'ingredients' not in jsondata or not isinstance(jsondata['ingredients'], list):
+                errors.append("Missing or invalid 'ingredients' (must be a list)")
 
-        else:
-            for i, ing in enumerate(jsondata['ingredients']):
-                if 'name' not in ing or not isinstance(ing['name'], str):
-                    errors.append(f"Ingredient {i}: missing or invalid 'name'")
-                if 'weight' not in ing or not isinstance(ing['weight'], (int, float)):
-                    errors.append(f"Ingredient {i}: missing or invalid 'weight'")
-                if 'category' not in ing or not isinstance(ing['category'], str):
-                    errors.append(f"Ingredient {i}: missing or invalid 'category'")
-                if 'quantity' in ing and ing['quantity'] is not None and not isinstance(ing['quantity'], (int, float)):
-                    errors.append(f"Ingredient {i}: 'quantity' must be number or null")
-                if 'unit' in ing and ing['unit'] is not None and not isinstance(ing['unit'], str):
-                    errors.append(f"Ingredient {i}: 'unit' must be string or null")
-                
-        if len(errors) != 0:
-            raise ValueError(f"Invalid json: {', '.join(errors)}")
-
+            else:
+                for i, ing in enumerate(jsondata['ingredients']):
+                    if 'name' not in ing or not isinstance(ing['name'], str):
+                        errors.append(f"Ingredient {i}: missing or invalid 'name'")
+                    if 'weight' not in ing or not isinstance(ing['weight'], (int, float)):
+                        errors.append(f"Ingredient {i}: missing or invalid 'weight'")
+                    if 'category' not in ing or not isinstance(ing['category'], str):
+                        errors.append(f"Ingredient {i}: missing or invalid 'category'")
+                    if 'quantity' in ing and ing['quantity'] is not None and not isinstance(ing['quantity'], (int, float)):
+                        errors.append(f"Ingredient {i}: 'quantity' must be number or null")
+                    if 'unit' in ing and ing['unit'] is not None and not isinstance(ing['unit'], str):
+                        errors.append(f"Ingredient {i}: 'unit' must be string or null")
+                    
+            if len(errors) != 0:
+                raise ValueError(f"Invalid json: {', '.join(errors)}")
+        except Exception as exc:
+            raise Exception(f"{recipe}") from exc
         return recipe
 
     def set_quantity_none(self, complexIngredientList:ComplexIngredientList)->ComplexIngredientList:
@@ -125,11 +128,8 @@ class RunnableComplexIngredientExtractor(Runnable):
     def select_category(self)->Runnable:
         """ select one of the following categories for the ingredent: Obst/Gemüse, Vegan, Milchprodukte, Tiefkühl, Sonstiges """
         return (self.category_prompt 
-                | self.debugger.Runnable_PrintStructureWithLabel("recipe Prompt")
                 | self.llm 
-                | self.debugger.Runnable_PrintStructureWithLabel("Recipe llm output")
                 | self.clean_and_format_output
-                | self.debugger.Runnable_PrintStructureWithLabel("Recipe cleaned")
                 | self.strOutputParser)
     
     def get_category(self, ingredient):
