@@ -1,4 +1,5 @@
 ﻿from langchain_ollama import OllamaLLM, OllamaEmbeddings
+from langchain_openai import OpenAI
 from langchain_core.runnables import RunnableAssign
 from Utils import FileLoader
 from Runnables import RunnableRawIngredientExtracor, RunnableRecipeSeparator, RunnableComplexIngredientExtractor, RunnableEmbeddingStringBuilder, RunnableEmbeddingStringExtractor
