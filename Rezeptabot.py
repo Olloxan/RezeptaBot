@@ -9,7 +9,7 @@ os.environ["OLLAMA_HOST"] = "http://127.0.0.1:11434"
 
 vector_store = VectorStore(collection_name='recipe_embeddings')
 
-modelname = "qwen3:latest"
+modelname = "qwen3:8b"
 model = OllamaLLM(model = modelname)
 chatbot = ChatbotWithHistory(model=model, vector_store=vector_store)
 chatbot.preloadModel()

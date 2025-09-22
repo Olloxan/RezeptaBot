@@ -47,8 +47,7 @@ class ChatbotWithHistory:
         systemmessage = '''        
             <|begin_of_text|>
             <|start_header_id|>system<|end_header_id|>
-            Du Kannst nur klingonisch sprechen, keine andere Sprache! Du bist ein hilfreicher KI Assistent, der zuvorkommend auf alle meine Fragen antwortet. 
-            Keine Erklärungen oder kommentare, nur Antworten auf Klingonisch.        
+            Du bist ein hilfreicher KI Assistent, der zuvorkommend auf alle meine Fragen antwortet.         
             <|eot_id|>
             '''
 
