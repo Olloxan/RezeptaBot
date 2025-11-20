@@ -51,7 +51,9 @@ class UserInterface:
                         # })
                         
                         self.data_frame_weekplan = gr.DataFrame(value=initial_data, headers=["Tag", "Morgens", "Mittags", "Abends", "Nachmittags"], label="Editable Table", interactive=True, show_label=False)
-                        self.submit_btn_weekplan = gr.Button("Process Week Plan")
+                        with gr.Row():
+                            self.submit_btn_weekplan = gr.Button("Process Week Plan")
+                            self.clear_btn_weekplan = gr.Button("Clear")
                     
                     # Middle column: Chatbot
                     with gr.Column(scale=1):
@@ -105,10 +107,14 @@ class UserInterface:
 ###################### attach events ######################
     def _attach_button_events(self):
         """Attach event handlers to buttons."""
-    
+        
         # Weekly plan dataframe
         self.submit_btn_weekplan.click(fn=self._handle_dataframe_contents, inputs=[self.data_frame_weekplan, self.chatbot], outputs=self.chatbot)
-
+        
+        # Add the clear button functionality
+        
+        self.clear_btn_weekplan.click(fn=self._clear_weekplan_dataframe, inputs=self.data_frame_weekplan, outputs=self.data_frame_weekplan)
+        
         # Chat submit and clear buttons
         self.submit.click(fn=self._handle_chat_submit, inputs=[self.msg, self.chatbot], outputs=[self.msg, self.chatbot])
         self.msg.submit(fn=self._handle_chat_submit, inputs=[self.msg, self.chatbot], outputs=[self.msg, self.chatbot])
@@ -117,7 +123,7 @@ class UserInterface:
         # Document retrieval button
         self.retrieval_input.submit(fn=self._retrieve_from_vectorstore, inputs=self.retrieval_input, outputs=self.data_frame_retrieval)
         self.submit_btn_retrieve.click(fn=self._retrieve_from_vectorstore, inputs=self.retrieval_input, outputs=self.data_frame_retrieval)        
-        
+    
         self.receipe_selection.submit(fn=self._handle_receipe_choice, inputs=[self.receipe_selection, self.chatbot], outputs=[self.receipe_selection, self.chatbot])
         self.submit_btn_receipe_select.click(fn=self._handle_receipe_choice, inputs=[self.receipe_selection, self.chatbot],outputs=[self.receipe_selection, self.chatbot])
 
@@ -186,7 +192,18 @@ class UserInterface:
             chat_history[-1] = (selection, bot_message_part)        
             yield None, chat_history   
         
-        
+    def _clear_weekplan_dataframe(self, dataframe):
+        """Clear the week plan dataframe while keeping the weekdays."""
+        # Create a copy of the dataframe with empty values but keeping the same structure
+        import pandas as pd
+        if dataframe is not None:
+            # Keep the same structure but clear all values except the weekdays
+            cleared_data = dataframe.copy()
+            cleared_data.iloc[:, 1:] = ""  # Clear all columns except the first (weekdays)
+            return cleared_data
+        else:
+            # If dataframe is None, return an empty dataframe with the same structure
+            return pd.DataFrame(columns=["Tag", "Morgens", "Mittags", "Abends", "Nachmittags"])
+    
     def _build_initial_data(self):
         pass
-        
