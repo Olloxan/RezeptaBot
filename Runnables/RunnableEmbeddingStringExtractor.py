@@ -1,6 +1,5 @@
 from langchain_core.runnables import Runnable
 from langchain_core.documents import Document
-import json
 
 from BaseModels import ComplexIngredientList
 from Utils import Logger
@@ -12,19 +11,19 @@ class RunnableEmbeddingStringExtractor(Runnable):
     def invoke(self, state: dict)->list[Document]:
         """
         expected dict: 
-        state['input'] = list[Document]                
+        state['input'] = list[json objects]                
         """
         self.LogMessage(f"Extracting embedding strings for {len(state['input'])} recipes")    
         embeddingstrings = []
         for document in state['input']:
 
-            complexIngredientList = ComplexIngredientList(**json.loads(document.page_content))
+            complexIngredientList = ComplexIngredientList(**document['page_content'])
 
             ingredients = [ingredient.name for ingredient in complexIngredientList.ingredients]
             ingredients_str = ", ".join(ingredients)        
         
             text_to_embed = f"{complexIngredientList.recipe_name} - Ingredients: {ingredients_str}"
-            embeddingstrings.append(Document(page_content=text_to_embed, metadata=document.metadata))
+            embeddingstrings.append(Document(page_content=text_to_embed, metadata=document['metadata']))
         self.LogMessage(f"Extracted embedding strings")    
         return embeddingstrings
     

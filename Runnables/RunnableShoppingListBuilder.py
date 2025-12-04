@@ -6,7 +6,7 @@ from BaseModels import ComplexIngredientList, Ingredient
 class RunnableShoppingListBuilder(Runnable):
     def __init__(self):        
         self.shopping_list = []
-        self.categories = {"Obst/Gemüse":[], "Vegan":[], "Milchprodukte":[], "Tiefkühl":[], "Sonstiges":[]}
+        self.categories = {"Obst/Gemüse":[], "Vegan":[], "Milchprodukte":[], "Tiefkühl":[], "Gewürze":[], "Sonstiges":[]}
         
     def invoke(self, state:dict) ->list[ComplexIngredientList]:
         """ expected dict: state['input'] = List[ComplexIngredientList] 

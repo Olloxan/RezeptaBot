@@ -109,7 +109,7 @@ class ChatbotWithHistory:
         
         # Recipe filtering
         source = self.vector_store.get_last_selected_source().split("\\")[-1]
-        complex_ingredient_documents = self.fileLoader.load_documents_from_disk("Recipes/Json/ComplexIngredients.json")
+        complex_ingredient_documents = self.fileLoader.load_json_from_disk("Recipes/Json/ComplexIngredients.json")
                 
         all_complex_ingredients_of_the_week = self.filter_ComplexIngredients_by_source(complex_ingredient_documents, source)                        
         filtered_complexIngredients = self.filter_complexIngredients_by_weekplan(all_complex_ingredients_of_the_week, meals_by_time_of_day)        
@@ -156,9 +156,9 @@ class ChatbotWithHistory:
         """
         filtered_docs = [
             doc for doc in documents
-            if filterstr in doc.metadata.get('source', '')
+            if filterstr in doc['metadata'].get('source', '')
         ]        
-        filtered_complex_ingredients_json = [json.loads(data.page_content) for data in filtered_docs]                
+        filtered_complex_ingredients_json = [data['page_content'] for data in filtered_docs]                
         complex_ingredients = [ComplexIngredientList(**item) for item in filtered_complex_ingredients_json]
         return complex_ingredients
 

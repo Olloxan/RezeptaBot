@@ -13,7 +13,7 @@ fileloader = FileLoader()
 
 # Prepare Environment
 modelname = "llama3.1:latest"
-embedding_modelname = "mxbai-embed-large"
+embedding_modelname = "bge-m3:latest"
 llm = OllamaLLM(model = modelname)
 
 
@@ -90,7 +90,7 @@ llm = OllamaLLM(model = modelname)
 #   Part 5: Embedding String Extraction if ComplexIngredients are available  #
 ##############################################################################
 
-pages = fileloader.load_documents_from_disk("Recipes/Json/ComplexIngredients.json")
+pages = fileloader.load_json_from_disk("Recipes/Json/ComplexIngredients.json")
 state = {'input': pages}
 
 embeddingStringExtractor = RunnableEmbeddingStringExtractor()
@@ -101,23 +101,23 @@ fileloader.store_documents_on_disk(embedding_strings, 'logs/RecipeEmbeddingStrin
 #   Part 6: String Embedding   #
 ################################
 
-# embeddings = OllamaEmbeddings(model=embedding_modelname) 
+embeddings = OllamaEmbeddings(model=embedding_modelname) 
 
-# # Define the path where you want to store the ChromaDB database
-# db_path = 'logs/Chroma'
+# Define the path where you want to store the ChromaDB database
+db_path = 'logs/Chroma'
 
-# logger.LogMessage(f"Chroma path {db_path}")
-# logger.LogMessage(f"Start generating embeddings for {len(pages)} documents.")
+logger.LogMessage(f"Chroma path {db_path}")
+logger.LogMessage(f"Start generating embeddings for {len(pages)} documents.")
 
 
-# # Use Chroma as the vector store
-# vector_store = Chroma.from_documents(
-#     documents=embedding_strings,
-#     embedding=embeddings,
-#     persist_directory=db_path, 
-#     collection_name='recipe_embeddings'
-# )
+# Use Chroma as the vector store
+vector_store = Chroma.from_documents(
+    documents=embedding_strings,
+    embedding=embeddings,
+    persist_directory=db_path, 
+    collection_name='recipe_embeddings'
+)
 
-# logger.LogMessage(f"Embeddings generated and stored in ChromaDB at {db_path}")
+logger.LogMessage(f"Embeddings generated and stored in ChromaDB at {db_path}")
 
 logger.LogMessage("Hello World")
