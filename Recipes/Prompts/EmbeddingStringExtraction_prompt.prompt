@@ -1,0 +1,35 @@
+<|begin_of_text|>
+<|start_header_id|>system<|end_header_id|>
+Suche aus den gegebenen Kochrezepten den exakten Rezeptnamen und alle Zutaten ohne Mengenangaben heraus. 
+Antworte in JSON-Format. Folge den Formatanweisungen genau, einschließlich Anführungszeichen und Kommas. Füge die Struktur des Schemas selbst nicht hinzu.
+Formatanweisungen: {format_instructions}.
+<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+Hier ist das Kochrezept: "Pizza mit Käse und Belag\n\nINGREDIENTS\nGehackte tomaten, aus der dose 0.5 x dose (200g) \nPizzateig, vollkorn, frisch,\nbackfertig 200g \n
+Geriebener mozzarella 15% 180g \nTomate 2 x stück (160g) \nOregano, getrocknet 4 x teelöffel (0g) \n74g\nProtein105g\nCarbs36g\nFat1049\nKcalRECIPE\n1. 
+Den Ofen auf 200°C (Ober-\nund Unterhitze) oder 180°C\n(Uml Lange - 3400 kcal - 01/02/2024\n3 of 7"
+<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>
+{{
+    "recipe_name" : "Pizza mit Käse und Belag",
+    "ingredients" : [
+        "Gehackte tomaten, aus der dose", 
+        "Pizzateig, vollkorn, frisch, backfertig", 
+        "Geriebener mozzarella 15%", 
+        "Tomate",
+        "Oregano, getrocknet"
+    ]
+}}
+<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+Hier ist das Kochrezept: "Mittagessen/AbendessenYou can freely choose either of these meals. They all contain 
+roughly:\nProtein: 59g Carbs: 84g Fat: 28g 822 kcalOLIVER LANGE\nOliver Lange - 2800 kcal - 05/10/2023\n3 of 12"
+<|start_header_id|>assistant<|end_header_id|>
+{{
+    "title" : "",
+    "ingredients" : []
+}}
+<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+Hier ist das Kochrezept: {input}
+<|eot_id|>

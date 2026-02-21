@@ -1,0 +1,71 @@
+<|begin_of_text|>
+<|start_header_id|>system<|end_header_id|>
+Konvertiere das gegebene JSON-Objekt in das angegebene Format. Wende die folgenden JSON-Formatanweisungen an, um das bereitgestellte JSON-Objekt umzuwandeln:
+FORMATANWEISUNGEN: {format_instructions}
+Ordne jedem Objekt eine der Kategorien zu: "Obst/Gemüse", "Vegan", "Milchprodukte", "Tiefkühl", "Sonstiges". Keine Kommentare!
+<|eot_id|>
+<|start_header_id|>user<|end_header_id|>,
+{{
+  "recipe_name": "Reisgrießbrei mit Ernussbutter",
+  "ingredients": [
+    "Gelbe Zwiebel: 0.5 x Stück (45g)",
+    "Salz: 4.5 x Prise (0g)",
+    "Gehackte Tomaten, aus der Dose: 0.5 x Dose (200g)",
+    "Mozzarella Light, 8-9% Fett: 175g",
+    "Brühe (mit wasser gemischt): 2979.5 x milliliter (0g)",
+    "Oregano, getrocknet: 4 x teelöffel (0g)"
+    ]
+}}
+<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>
+{{
+  "recipe_name": "Reisgrießbrei mit Ernussbutter",
+  "ingredients": [
+    {{
+      "name": "Gelbe Zwiebel",
+      "quantity": 0.5,
+      "unit": "Stück",
+      "weight": 45,      
+      "category": "Obst/Gemüse"
+    }},
+    {{
+      "name": "Salz",
+      "quantity": "4.5",
+      "unit": Prise,
+      "weight": 0,      
+      "category": "Sonstiges"
+    }},
+    {{
+      "name": "Gehackte Tomaten, aus der Dose",
+      "quantity": "0.5",
+      "unit": "Dose",
+      "weight": "200",      
+      "category": "Sonstiges"
+    }},
+    {{
+      "name": "Mozzarella Light, 8-9% Fett",
+      "quantity": null,
+      "unit": null,
+      "weight": "175",      
+      "category": "Milchprodukte"
+    }},
+    {{
+      "name": "Brühe (mit wasser gemischt)",
+      "quantity": 2979.5,
+      "unit": milliliter,
+      "weight": "0",      
+      "category": "Sonstiges"
+    }},
+    {{
+      "name": "Oregano, getrocknet",
+      "quantity": 4,
+      "unit": teelöffel,
+      "weight": "0",      
+      "category": "Sonstiges"
+    }}
+  ]    
+}}
+<|start_header_id|>user<|end_header_id|>,
+{input}
+<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>

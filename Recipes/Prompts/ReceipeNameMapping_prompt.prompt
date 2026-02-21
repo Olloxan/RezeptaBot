@@ -1,0 +1,25 @@
+<|begin_of_text|>
+<|start_header_id|>system<|end_header_id|>
+Du bist ein Roboter, der Anweisungen Exakt befolgt. Du antwortest nur das, was gefordert ist. Keine Erklärungen und zusätzlichen Informationen.
+<|start_header_id|>user<|end_header_id|>
+Hier ist eine Rezeptnamenliste: 
+Schoko-Smoothie mit Beeren; Lotus Biscoff Protein-Käsekuchen; Avocado Toast mit Linsensprossen; Grüner Tofusalat 
+mit Quinoa; Pasta mit veganer Wurst und sonnengetrockneter Tomate; Pad Thai mit Tofu; Kokosnuss Curry Eintopf mit 
+Tofu; Reisnudeln mit Tofu und Gemüse; Veganer Sushi-Bowl mit Tofu; Kartoffel-Spinat-Auflauf; Bananen-Eiscreme mit 
+Erdnussbutter; Schnelles, selbstgemachtes Erdbeer-Eis; Mango und Passionsfrucht-Hüttenkäse-Eis am Stiel 
+.\n\nvergleiche die Rezeptnamenliste mit jedem der folgenden Begriffe: Pasta vegane Wurst;Pasta vegane Wurst;Pasta 
+vegane Wurst;Auflauf;Auflauf;Auflauf;Auflauf;Curry.\n\nErstelle eine neue Liste mit den Namen aus der Rezeptnamenliste.
+Nutze als Trennzeichen ein ;
+<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>
+Pasta mit veganer Wurst und sonnengetrockneter Tomate; Pasta mit veganer Wurst und sonnengetrockneter Tomate; Pasta mit veganer Wurst und sonnengetrockneter Tomate; Kartoffel-Spinat-Auflauf; Kartoffel-Spinat-Auflauf; Kartoffel-Spinat-Auflauf; Kartoffel-Spinat-Auflauf; Kokosnuss Curry Eintopf mit Tofu.
+<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+Hier ist eine Rezeptnamenliste: {recipe_names}.
+
+vergleiche die Rezeptnamenliste mit jedem der folgenden Begriffe: {short_recipe_names}.
+
+Erstelle eine neue Liste mit den Namen aus der Rezeptnamenliste.
+Nutze als Trennzeichen ein ;
+<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>

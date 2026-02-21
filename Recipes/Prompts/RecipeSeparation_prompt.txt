@@ -1,0 +1,32 @@
+<|begin_of_text|>
+<|start_header_id|>system<|end_header_id|>
+Suche aus den gegebenen Kochrezepten den Rezeptnamen heraus. Wenn kein Rezept und keine Zutaten vorhanden sind, antworte "leer". Keine Kommentare!
+<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+Hier ist das Kochrezept: "FrühstückYou can freely choose either of these meals. They all contain roughly:\nProtein: 56g 
+Carbs: 109g Fat: 42g 1032 kcal\nReisgrießbrei mit Ernussbutter\nINGREDIENTS\nReisgrieß/cream of rice 100g 
+\nHafermilch 475g \nErdnussbutter/erdnussmus, min.\n99% erdnüsse 50g \nWhey proteinpulver, mit\ngeschmack 50g 
+\nHimbeeren 100g \n61g\nProtein123g\nCarbs35g\nFat1059\nKcalRECIPE\n1. ke mischen. \nAnanas und Spinat Smoothie mit Chiasamen\nINGREDIENTS\nChiasamen 30g 
+\nKokosnuss-drink, 0,9% fett, alpro 600 x milliliter (600g) \nAnanas 400g \nBlattspinat 60g \nVeganes 
+proteinpulver, mit\ngeschmack 40g \nCashewkerne 70g \n50g\nProte7"
+<|start_header_id|>assistant<|end_header_id|>
+Reisgrießbrei mit Ernussbutter; Ananas und Spinat Smoothie mit Chiasamen
+<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+Hier ist das Kochrezept: "FrühstückYou can freeoughly:\nProtein: 69g Carbs: 129g Fat: 31g 1049 kcal\nPudding Oats\nINGREDIENTS\nErdnussbutter 30g \nHaferflocken 80g \nOrigg) \nHafermilch 
+300g \nSkyr, 0,2%, natur 500g \nHonig 1.5 x TL. (10g) \n76g\nProtein136g\nCarbs25g\nFat1070\nKcalRECIPE\nHaferflocken mit Hafermilch\nund Honig aufkenießen \nEasy Apple Crumble\nINGREDIENTS\nApfel 3.5 x klein (192g) 
+\nKokosöl 30g \nHonig 35g \nHaferflocken 75g \nMagerquark 0,2% fett 455g \n028\nKcalRECIPE\nDie Äpfel in Spalten\nschneiden. Honig und\cken und Zimt\ndarüber geben 
+und alles\ngoldbraun anbraten.\nZum Magerquark\ndazugeben und genießen. OLIVER LANGE\nOliver Lange - 3400 kcal - 03/11/2023\n1 of 7"
+<|start_header_id|>assistant<|end_header_id|>
+Pudding Oats; Easy Apple Crumble
+<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+Hier ist das Kochrezept: "Mittagessen/AbendessenYou can freely choose either of these meals. They all contain 
+roughly:\nProtein: 59g Carbs: 84g Fat: 28g 822 kcalOLIVER LANGE\nOliver Lange - 2800 kcal - 05/10/2023\n3 of 12"
+<|start_header_id|>assistant<|end_header_id|>
+leer
+<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+Hier ist das Kochrezept: {input}
+<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>
